@@ -1,0 +1,11 @@
+{
+  "dateModifiedOffset" : 1616650594000,
+  "uuidsWithDateModifiedOffset": ["dddd"],
+  "optimize": false,
+  "syncScope": {
+    "siteUuid":"s1",
+    "country": "c1"
+  },
+  "offset": 5,
+  "limit": 10
+}

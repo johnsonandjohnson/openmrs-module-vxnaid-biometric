@@ -1,0 +1,6 @@
+{
+  "syncErrorKeys": [
+    "license:IRIS_CLIENT,GET_LICENSE_CALL",
+    "license:IRIS_MATCHING,RELEASE_LICENSE_CALL"
+  ]
+}

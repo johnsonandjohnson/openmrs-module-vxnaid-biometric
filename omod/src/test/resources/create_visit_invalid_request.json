@@ -1,0 +1,9 @@
+{
+  "participantUuid":"867d1cff-d8c5-4645-91d5-0a773a33c83b",
+  "visitType":"Other",
+  "startDatetime":"2021-02-10T04:09:25.000Z",
+  "attributes":[{
+    "type":"Visit Status",
+    "value":"OCCURRED"
+  }]
+}

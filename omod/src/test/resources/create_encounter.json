@@ -1,0 +1,20 @@
+{
+  "visitUuid": "0d68106e-8753-4e31-b65d-11d322a7e81d",
+  "locationUuid": "9dd05e68-4d77-4b61-b2bf-436857f35aa0",
+  "attributes": [
+    {
+      "type": "Visit Status",
+      "value": "OCCURRED"
+    }
+  ],
+  "observations": [
+    {
+      "name": "Vaccine Manufacturer",
+      "value": "Pfizer"
+    },
+    {
+      "name": "Barcode",
+      "value": "dose1 visit"
+    }
+  ]
+}

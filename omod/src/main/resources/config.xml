@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<module configVersion="1.2">
+
+    <!-- Base Module Properties -->
+    <id>${project.parent.artifactId}</id>
+    <name>${project.parent.name}</name>
+    <version>${project.parent.version}</version>
+    <package>org.openmrs.module.biometric</package>
+    <author>Connect for Life</author>
+    <description>
+        ${project.parent.description}
+    </description>
+
+    <activator>org.openmrs.module.biometric.BiometricModuleActivator</activator>
+
+    <!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
+    <!-- /Base Module Properties -->
+
+    <require_version>${openmrs.platform.version}</require_version>
+
+    <require_modules>
+        <require_module version="${addressHierarchyVersion}">
+            org.openmrs.module.addresshierarchy
+        </require_module>
+        <require_module version="${licenseManagementVersion}">
+            org.openmrs.module.licensemanagement
+        </require_module>
+        <require_module version="${uiframeworkVersion}">
+            org.openmrs.module.uiframework
+        </require_module>
+    </require_modules>
+
+    <!-- Extensions -->
+    <extension>
+        <point>org.openmrs.admin.list</point>
+        <class>org.openmrs.module.biometric.extension.html.AdminList</class>
+    </extension>
+
+    <filter>
+        <filter-name>Biometric Module Authorization</filter-name>
+        <filter-class>org.openmrs.module.biometric.filter.AuthorizationFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>Biometric Module Authorization</filter-name>
+        <url-pattern>/ws/rest/v1/biometric/*</url-pattern>
+    </filter-mapping>
+
+    <privilege>
+        <name>Biometric Privilege</name>
+        <description>Allows user to access biometric module</description>
+    </privilege>
+
+    <require_module version="${coreappsVersion}">
+        org.openmrs.module.coreapps
+    </require_module>
+
+    <!-- Internationalization -->
+    <!-- All message codes should start with @MODULE_ID@.* -->
+    <messages>
+        <lang>en</lang>
+        <file>messages.properties</file>
+    </messages>
+    <!-- /Internationalization -->
+
+</module>
+
