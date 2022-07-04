@@ -1,0 +1,34 @@
+{
+  "syncErrors": [
+    {
+      "metadata": {
+        "type": "license",
+        "licenseType": "IRIS_CLIENT",
+        "action": "GET_LICENSE_CALL"
+      },
+      "stackTrace": "Exception(test)",
+      "dateCreated": "2021-05-18T14:12:58.073Z",
+      "key": "license:IRIS_CLIENT,GET_LICENSE_CALL"
+    },
+    {
+      "metadata": {
+        "type": "license",
+        "licenseType": "IRIS_MATCHING",
+        "action": "RELEASE_LICENSE_CALL"
+      },
+      "stackTrace": "Exception(test)",
+      "dateCreated": "2021-05-18T14:12:58.073Z",
+      "key": "license:IRIS_MATCHING,RELEASE_LICENSE_CALL"
+    },
+    {
+      "metadata": {
+        "type": "license",
+        "licenseType": "IRIS_CLIENT",
+        "action": "ACTIVATE_LICENSE"
+      },
+      "stackTrace": "Exception(test)",
+      "dateCreated": "2021-05-18T14:12:58.073Z",
+      "key": "license:IRIS_CLIENT,ACTIVATE_LICENSE"
+    }
+  ]
+}

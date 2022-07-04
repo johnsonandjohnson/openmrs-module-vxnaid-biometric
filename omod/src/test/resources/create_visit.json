@@ -1,0 +1,19 @@
+{
+  "participantUuid":"867d1cff-d8c5-4645-91d5-0a773a33c83b",
+  "visitType":"Other",
+  "startDatetime":"2021-02-10T04:09:25.000Z",
+  "locationUuid":"42655fae-3b09-4b15-bb4b-296311546be4",
+  "visitUuid": "42655fae-3b09-4b15-bb4b-296311546re4",
+  "observations":[{
+    "name" : "Barcode",
+    "value": ""
+  },
+  {
+    "name": "Vaccine Manufacturer",
+    "value": "A&B"
+  }],
+  "attributes":[{
+    "type":"Visit Status",
+    "value":"OCCURRED"
+  }]
+}

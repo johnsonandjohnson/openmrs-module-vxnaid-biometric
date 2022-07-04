@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Beans to add to the current Application context definition -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+  		    http://www.springframework.org/schema/context
+  		    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:component-scan base-package="org.openmrs.module.biometric"/>
+
+    <bean id="biometric.participantService"
+          class="org.openmrs.module.biometric.api.service.impl.ParticipantServiceImpl">
+    </bean>
+
+    <bean id="biometric.biometricService" class="org.openmrs.module.biometric.api.service.impl.BiometricServiceImpl">
+    </bean>
+
+    <bean id="biometric.deviceUserService" class="org.openmrs.module.biometric.api.service.impl.DeviceUserServiceImpl">
+    </bean>
+
+    <bean id="biometric.configService" class="org.openmrs.module.biometric.api.service.impl.ConfigServiceImpl">
+        <property name="deviceService" ref="licensemanagement.DeviceService"/>
+        <property name="licenseService" ref="licensemanagement.LicenseService"/>
+        <property name="licenseTypeService" ref="licensemanagement.LicenseTypeService"/>
+    </bean>
+
+    <bean id="biometric.visitSchedulerService"
+          class="org.openmrs.module.biometric.api.service.impl.VisitSchedulerServiceImpl">
+        <constructor-arg name="visitService" ref="visitService"/>
+        <constructor-arg name="encounterService" ref="encounterService"/>
+        <constructor-arg name="patientService" ref="patientService"/>
+        <property name="sessionFactory">
+            <ref bean="dbSessionFactory"/>
+        </property>
+    </bean>
+
+    <bean id="biometric.syncService" class="org.openmrs.module.biometric.api.service.impl.SyncServiceImpl">
+        <property name="syncDao">
+            <ref local="biometric.syncDao"/>
+        </property>
+    </bean>
+
+    <bean id="objectMapper"
+          class="org.codehaus.jackson.map.ObjectMapper"/>
+
+    <bean id="biometric.syncDao" class="org.openmrs.module.biometric.api.db.impl.SyncDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+</beans>

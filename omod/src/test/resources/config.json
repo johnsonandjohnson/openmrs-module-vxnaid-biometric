@@ -1,0 +1,202 @@
+{
+  "vaccine": [
+    {
+      "name": "Covid 1D vaccine",
+      "manufacturers": [
+        "J&J"
+      ]
+    },
+    {
+      "name": "Covid 2D vaccine",
+      "manufacturers": [
+        "Pfizer",
+        "Moderna"
+      ]
+    },
+    {
+      "name": "Covid 3D vaccine",
+      "manufacturers": [
+        "Pfizer",
+        "Pfizer",
+        "AstraZeneca"
+      ]
+    }
+  ],
+  "canUseDifferentManufacturers": true,
+  "manufacturers": [
+    {
+      "name": "J&J",
+      "barcodeRegex": "JNJ[0-9]{13}"
+    },
+    {
+      "name": "Pfizer",
+      "barcodeRegex": "P[0-9]{13}"
+    },
+    {
+      "name": "Moderna",
+      "barcodeRegex": "M[0-9]{13}"
+    },
+    {
+      "name": "AstraZenica",
+      "barcodeRegex": "AZ[0-9]{13}"
+    }
+  ],
+  "personLanguages": [
+    {
+      "name": "English"
+    },
+    {
+      "name": "French"
+    },
+    {
+      "name": "Dutch"
+    }
+  ],
+  "authSteps": [
+    {
+      "type": "id_card",
+      "mandatory": true
+    },
+    {
+      "type": "iris_scan",
+      "mandatory": false
+    }
+  ],
+  "irisScore": "40",
+  "addressFields": {
+    "India": [
+      {
+        "mappingPos": 1,
+        "name": "State",
+        "field": "stateProvince"
+      },
+      {
+        "mappingPos": 3,
+        "name": "City",
+        "field": "cityVillage"
+      },
+      {
+        "mappingPos": 4,
+        "name": "Postal Code",
+        "field": "postalCode"
+      },
+      {
+        "name": "Street",
+        "field": "address1"
+      },
+      {
+        "name": "Number",
+        "field": "address2"
+      }
+    ],
+    "Belgium": [
+      {
+        "mappingPos": 3,
+        "name": "City",
+        "field": "cityVillage"
+      },
+      {
+        "mappingPos": 4,
+        "name": "Postal Code",
+        "field": "postalCode"
+      },
+      {
+        "name": "Street",
+        "field": "address1"
+      },
+      {
+        "name": "Number",
+        "field": "address2"
+      }
+    ],
+    "Switzerland": [
+      {
+        "mappingPos": 3,
+        "name": "City",
+        "field": "cityVillage"
+      },
+      {
+        "mappingPos": 4,
+        "name": "PLZ",
+        "field": "postalCode"
+      },
+      {
+        "name": "Street",
+        "field": "address1"
+      },
+      {
+        "name": "Number",
+        "field": "address2"
+      }
+    ],
+    "Rwanda": [
+      {
+        "mappingPos": 1,
+        "name": "Province",
+        "field": "stateProvince"
+      },
+      {
+        "mappingPos": 2,
+        "name": "District",
+        "field": "countyDistrict"
+      },
+      {
+        "mappingPos": 3,
+        "name": "Sector",
+        "field": "cityVillage"
+      },
+      {
+        "mappingPos": 4,
+        "name": "Postal Code",
+        "field": "postalCode"
+      },
+      {
+        "name": "street",
+        "field": "address1"
+      }
+    ],
+    "USA": [
+      {
+        "mappingPos": 1,
+        "name": "State",
+        "field": "stateProvince"
+      },
+      {
+        "mappingPos": 3,
+        "name": "City",
+        "field": "cityVillage"
+      },
+      {
+        "mappingPos": 4,
+        "name": "ZIP Code",
+        "field": "postalCode"
+      }
+    ],
+    "Philippines": [
+      {
+        "mappingPos": 1,
+        "name": "Greater area",
+        "field": "stateProvince"
+      },
+      {
+        "mappingPos": 2,
+        "name": "City",
+        "field": "countyDistrict"
+      },
+      {
+        "mappingPos": 3,
+        "name": "Village",
+        "field": "cityVillage"
+      },
+      {
+        "mappingPos": 4,
+        "name": "Zip Code",
+        "field": "postalCode"
+      },
+      {
+        "name": "street",
+        "field": "address1"
+      }
+    ]
+  }
+}

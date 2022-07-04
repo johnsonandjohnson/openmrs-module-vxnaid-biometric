@@ -1,0 +1,97 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.openmrs.module</groupId>
+    <artifactId>vxnaidbiometric</artifactId>
+    <version>1.2.7</version>
+  </parent>
+
+  <artifactId>vxnaidbiometric-api</artifactId>
+  <packaging>jar</packaging>
+  <name>Biometric API</name>
+  <description>API project for Biometric Module</description>
+
+  <properties>
+    <main.basedir>${project.parent.basedir}</main.basedir>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.openmrs.module</groupId>
+      <artifactId>visits-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openmrs.api</groupId>
+      <artifactId>openmrs-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openmrs.module</groupId>
+      <artifactId>vxnaidlicensemanagement-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openmrs.module</groupId>
+      <artifactId>addresshierarchy-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+    </dependency>
+
+    <!-- neurotec dependencies-->
+    <dependency>
+      <groupId>com.neurotec</groupId>
+      <artifactId>neurotec-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.neurotec</groupId>
+      <artifactId>neurotec-media</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.neurotec</groupId>
+      <artifactId>neurotec-media-processing</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.neurotec</groupId>
+      <artifactId>neurotec-biometrics</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.neurotec</groupId>
+      <artifactId>neurotec-biometrics-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.neurotec</groupId>
+      <artifactId>neurotec-licensing</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.neurotec</groupId>
+      <artifactId>neurotec-devices</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openmrs.api</groupId>
+      <artifactId>openmrs-api</artifactId>
+      <type>test-jar</type>
+    </dependency>
+
+  </dependencies>
+
+</project>
+
