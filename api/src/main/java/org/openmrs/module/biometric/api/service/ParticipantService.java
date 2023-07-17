@@ -12,6 +12,7 @@ package org.openmrs.module.biometric.api.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.openmrs.Patient;
 import org.openmrs.Person;
@@ -79,7 +80,7 @@ public interface ParticipantService {
    * @throws IOException when there is an issue in reading the images from the file path
    * @throws BiometricApiException when failed to upload a participant's image
    */
-  String retrieveParticipantImage(String personUuid) throws IOException, BiometricApiException;
+  Optional<String> retrieveParticipantImage(String personUuid) throws IOException, BiometricApiException;
 
   /**
    * Retrieve a patient by his phone.

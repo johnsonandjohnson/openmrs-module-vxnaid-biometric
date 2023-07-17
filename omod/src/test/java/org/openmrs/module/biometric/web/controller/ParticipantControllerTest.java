@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -685,7 +686,7 @@ public class ParticipantControllerTest {
 
   @Test
   public void retrievePersonImage_shouldReturnPersonImage() throws Exception {
-    when(participantService.retrieveParticipantImage(anyString())).thenReturn("");
+    when(participantService.retrieveParticipantImage(anyString())).thenReturn(Optional.of(""));
     mockMvc.perform(get(ControllerTestHelper.BASE_URL + "/personimage/{personUuid}", PERSON_UUID)
         .contentType(MediaType.TEXT_PLAIN))
         .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))

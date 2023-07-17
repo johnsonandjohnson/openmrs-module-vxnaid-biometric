@@ -10,25 +10,11 @@
 
 package org.openmrs.module.biometric.web.controller;
 
-import static org.openmrs.module.biometric.api.constants.BiometricApiConstants.PERSON_TEMPLATE_ATTRIBUTE;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.validation.Valid;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.type.TypeReference;
@@ -50,6 +36,7 @@ import org.openmrs.module.biometric.builder.ParticipantMatchResponseBuilder;
 import org.openmrs.module.biometric.builder.PatientBuilder;
 import org.openmrs.module.biometric.contract.ParticipantMatchResponse;
 import org.openmrs.module.biometric.contract.RegisterRequest;
+import org.openmrs.module.biometric.error.ApiError;
 import org.openmrs.module.biometric.util.BiometricModUtil;
 import org.openmrs.module.biometric.util.LocationUtil;
 import org.openmrs.module.biometric.util.SanitizeUtil;
@@ -69,6 +56,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.openmrs.module.biometric.api.constants.BiometricApiConstants.PERSON_TEMPLATE_ATTRIBUTE;
 
 /**
  * Consists of APIs to register and match participants.
@@ -499,25 +502,33 @@ public class ParticipantController extends BaseRestController {
       responseContainer = "String")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful return of the person image"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to return person image"),
-          @ApiResponse(code = HttpURLConnection.HTTP_NOT_FOUND, message = "Person image not found")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful return of the person image"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to return person image"),
+        @ApiResponse(code = HttpURLConnection.HTTP_NOT_FOUND, message = "Person image not found")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(value = "/personimage/{personUuid}", produces = {
-      MediaType.APPLICATION_JSON_VALUE}, method = RequestMethod.GET)
-  public String retrievePersonImage(
-
+  @RequestMapping(
+      value = "/personimage/{personUuid}",
+      produces = {MediaType.APPLICATION_JSON_VALUE},
+      method = RequestMethod.GET)
+  public Object retrievePersonImage(
       @ApiParam(name = "personUuid", value = "uuid of person", required = true)
-      @PathVariable("personUuid")
+          @PathVariable("personUuid")
           String personUuid)
       throws IOException, BiometricApiException {
-    return participantService.retrieveParticipantImage(personUuid);
+    Optional<String> imageString = participantService.retrieveParticipantImage(personUuid);
+    if (imageString.isPresent()) {
+      return imageString;
+    } else {
+      return new ApiError(
+          HttpStatus.NOT_FOUND.value(),
+          "Unable to retrieve image for person with uuid: " + personUuid);
+    }
   }
 
   /**

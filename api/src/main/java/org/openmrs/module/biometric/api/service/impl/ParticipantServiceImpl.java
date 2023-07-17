@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +41,7 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
+import org.openmrs.api.APIException;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
@@ -206,11 +208,10 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
   }
 
   @Override
-  public final String retrieveParticipantImage(String personUuid)
+  public final Optional<String> retrieveParticipantImage(String personUuid)
       throws IOException, BiometricApiException {
-    File imageFile = retrievePersonImage(personUuid);
-    byte[] imageFileContent = FileUtils.readFileToByteArray(imageFile);
-    return Base64.getEncoder().encodeToString(imageFileContent);
+    Optional<File> imageFile = retrievePersonImage(personUuid);
+    return imageFile.map(this::convertFileToBase64String);
   }
 
   @Override
@@ -270,7 +271,7 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
     return sessionFactory.getCurrentSession();
   }
 
-  private File retrievePersonImage(String personUuid) throws BiometricApiException, IOException {
+  private Optional<File> retrievePersonImage(String personUuid) throws BiometricApiException, IOException {
     Person person = personService.getPersonByUuid(personUuid);
     if (person == null) {
       LOGGER.error("Person with UUID: {} not found", personUuid);
@@ -285,16 +286,13 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
           .filter(p -> p.getFileName().toString().endsWith(file))
           .collect(Collectors.toList());
     }
-    if (results.isEmpty()) {
-      throw new EntityNotFoundException("Participant image not found");
-    }
 
     if (results.size() > 1) {
       LOGGER.info("Multiple images found for the participant: {} ", personUuid);
       throw new BiometricApiException("Multiple images found for the participant");
     }
 
-    return results.get(0).toFile();
+     return results.stream().findFirst().map(Path::toFile);
   }
 
   private List<PatientResponse> buildPatientResponse(List<Patient> patients)
@@ -335,5 +333,14 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
     }
     LOGGER.info("No of participants : {}", patients.size());
     return patients;
+  }
+
+  private String convertFileToBase64String(File file) {
+    try {
+      byte[] imageFileContent = FileUtils.readFileToByteArray(file);
+      return Base64.getEncoder().encodeToString(imageFileContent);
+    } catch (IOException e) {
+      throw new APIException("Error converting file to Base64 String.", e);
+    }
   }
 }
