@@ -51,7 +51,7 @@ public class SyncResponseBuilder {
     syncResponse.setLimit(syncRequest.getLimit());
     syncResponse.setTableCount(totalCount);
     syncResponse.setIgnoredCount(ignoredCount);
-    syncResponse.setVoidedCount(voidedCount);
+    syncResponse.setVoidedTableCount(voidedCount);
     syncResponse.setRecords(records);
     return syncResponse;
   }

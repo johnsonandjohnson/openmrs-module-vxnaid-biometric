@@ -523,7 +523,7 @@ public class ParticipantController extends BaseRestController {
       throws IOException, BiometricApiException {
     Optional<String> imageString = participantService.retrieveParticipantImage(personUuid);
     if (imageString.isPresent()) {
-      return imageString;
+      return imageString.get();
     } else {
       return new ApiError(
           HttpStatus.NOT_FOUND.value(),

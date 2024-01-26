@@ -10,10 +10,10 @@
 
 package org.openmrs.module.biometric.contract.sync;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
 import java.util.List;
 import java.util.Set;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * SyncResponse class.
@@ -38,8 +38,7 @@ public class SyncResponse {
   @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
   private Long ignoredCount;
 
-  @JsonProperty("voidedTableCount")
-  private Long voidedCount;
+  private Long voidedTableCount;
 
   private List<?> records;
 
@@ -107,12 +106,12 @@ public class SyncResponse {
     this.tableCount = tableCount;
   }
 
-  public Long getVoidedCount() {
-    return voidedCount;
+  public Long getVoidedTableCount() {
+    return voidedTableCount;
   }
 
-  public void setVoidedCount(Long voidedCount) {
-    this.voidedCount = voidedCount;
+  public void setVoidedTableCount(Long voidedTableCount) {
+    this.voidedTableCount = voidedTableCount;
   }
 
   @SuppressWarnings("java:S1452")

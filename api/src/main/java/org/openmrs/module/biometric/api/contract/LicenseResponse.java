@@ -10,33 +10,29 @@
 
 package org.openmrs.module.biometric.api.contract;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * License Response class.
  *
  */
 public class LicenseResponse {
 
-  @JsonProperty("type")
-  private String licenseType;
+  private String type;
 
-  @JsonProperty("value")
-  private String content;
+  private String value;
 
-  public String getLicenseType() {
-    return licenseType;
+  public String getType() {
+    return type;
   }
 
-  public void setLicenseType(String licenseType) {
-    this.licenseType = licenseType;
+  public void setType(String type) {
+    this.type = type;
   }
 
-  public String getContent() {
-    return content;
+  public String getValue() {
+    return value;
   }
 
-  public void setContent(String content) {
-    this.content = content;
+  public void setValue(String value) {
+    this.value = value;
   }
 }

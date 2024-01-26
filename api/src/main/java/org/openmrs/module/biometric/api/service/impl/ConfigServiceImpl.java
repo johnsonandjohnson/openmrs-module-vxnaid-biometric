@@ -139,20 +139,20 @@ public class ConfigServiceImpl implements ConfigService {
     configResponse.setName(CONFIG);
     String md5HashConfig = SecurityUtil
         .getMd5Hash(new ObjectMapper().readTree(configGp).toString());
-    configResponse.setMd5hash(md5HashConfig);
+    configResponse.setHash(md5HashConfig);
     responseList.add(configResponse);
 
     SyncConfigResponse locationResponse = new SyncConfigResponse();
     locationResponse.setName(LOCATIONS);
     String locationResponseInJson = new ObjectMapper().writeValueAsString(retrieveLocations());
-    locationResponse.setMd5hash(SecurityUtil
+    locationResponse.setHash(SecurityUtil
         .getMd5Hash(locationResponseInJson));
     responseList.add(locationResponse);
 
     SyncConfigResponse addressHierarchyResponse = new SyncConfigResponse();
     addressHierarchyResponse.setName(ADDRESS_HIERARCHY);
     String addressHResponse = new ObjectMapper().writeValueAsString(retrieveAddressHierarchy());
-    addressHierarchyResponse.setMd5hash(SecurityUtil
+    addressHierarchyResponse.setHash(SecurityUtil
         .getMd5Hash(addressHResponse));
     responseList.add(addressHierarchyResponse);
 
@@ -162,7 +162,7 @@ public class ConfigServiceImpl implements ConfigService {
     localizationResponse.setName(LOCALIZATION);
     String md5HashLocalization = SecurityUtil
         .getMd5Hash((new ObjectMapper().readTree(localizationGp).toString()));
-    localizationResponse.setMd5hash(md5HashLocalization);
+    localizationResponse.setHash(md5HashLocalization);
 
     responseList.add(localizationResponse);
 
@@ -172,7 +172,7 @@ public class ConfigServiceImpl implements ConfigService {
     vaccineScheduleResponse.setName(VACCINE_SCHEDULE);
     String md5HashVaccineSchedule = SecurityUtil
         .getMd5Hash(new ObjectMapper().readTree(vaccineScheduleGp).toString());
-    vaccineScheduleResponse.setMd5hash(md5HashVaccineSchedule);
+    vaccineScheduleResponse.setHash(md5HashVaccineSchedule);
 
     responseList.add(vaccineScheduleResponse);
     return responseList;
@@ -194,7 +194,7 @@ public class ConfigServiceImpl implements ConfigService {
       if (null == type) {
         throw new BiometricApiException(String.format(LICENCE_TYPE_ERROR, licenseType));
       }
-      response.setLicenseType(type.getName());
+      response.setType(type.getName());
       //existing device
       if (null != device) {
         DeviceAttribute deviceAttribute = deviceService
@@ -203,7 +203,7 @@ public class ConfigServiceImpl implements ConfigService {
         if (null != deviceAttribute) {
           //license already tagged to the device so return existing license
           License license = licenseService.getLicenseByUuid(deviceAttribute.getValueReference());
-          response.setContent(license.getSerialNo());
+          response.setValue(license.getSerialNo());
         } else {
           setLicense(response, type, device);
         }
@@ -290,11 +290,11 @@ public class ConfigServiceImpl implements ConfigService {
         .getAnyFreeLicense(licenseTypeService.getLicenseType(type.getName()));
     //device exists but no license available
     if (null == license) {
-      response.setContent(null);
+      response.setValue(null);
     } else {
       //if license is available, set device attribute with license
       addDeviceAttribute(device, type, license.getUuid());
-      response.setContent(license.getSerialNo());
+      response.setValue(license.getSerialNo());
     }
   }
 

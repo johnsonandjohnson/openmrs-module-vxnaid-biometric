@@ -53,7 +53,7 @@
           "200" : {
             "description" : "On successful return of vaccine details",
             "schema" : {
-              "$ref" : "#/definitions/JsonNode"
+              "type" : "string"
             }
           },
           "404" : {
@@ -83,7 +83,7 @@
           "200" : {
             "description" : "On successful return of config details by name",
             "schema" : {
-              "$ref" : "#/definitions/JsonNode"
+              "type" : "string"
             }
           },
           "404" : {
@@ -932,7 +932,7 @@
           "200" : {
             "description" : "On successful return of version details",
             "schema" : {
-              "$ref" : "#/definitions/JsonNode"
+              "type" : "string"
             }
           },
           "404" : {
@@ -1038,163 +1038,13 @@
     "InputStream" : {
       "type" : "object"
     },
-    "IteratorEntryStringJsonNode" : {
-      "type" : "object"
-    },
-    "IteratorJsonNode" : {
-      "type" : "object"
-    },
-    "IteratorString" : {
-      "type" : "object"
-    },
-    "JsonNode" : {
-      "type" : "object",
-      "properties" : {
-        "missingNode" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "bigIntegerValue" : {
-          "type" : "integer"
-        },
-        "textValue" : {
-          "type" : "string"
-        },
-        "numberValue" : {
-          "$ref" : "#/definitions/Number"
-        },
-        "intValue" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "numberType" : {
-          "type" : "string",
-          "enum" : [ "INT", "LONG", "BIG_INTEGER", "FLOAT", "DOUBLE", "BIG_DECIMAL" ]
-        },
-        "valueNode" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "valueAsText" : {
-          "type" : "string"
-        },
-        "fieldNames" : {
-          "$ref" : "#/definitions/IteratorString"
-        },
-        "object" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "pojo" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "containerNode" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "binary" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "integralNumber" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "textual" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "floatingPointNumber" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "valueAsLong" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "valueAsDouble" : {
-          "type" : "number",
-          "format" : "double"
-        },
-        "valueAsInt" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "valueAsBoolean" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "array" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "fields" : {
-          "$ref" : "#/definitions/IteratorEntryStringJsonNode"
-        },
-        "null" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "elements" : {
-          "$ref" : "#/definitions/IteratorJsonNode"
-        },
-        "doubleValue" : {
-          "type" : "number",
-          "format" : "double"
-        },
-        "longValue" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "booleanValue" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "number" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "int" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "boolean" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "double" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "decimalValue" : {
-          "type" : "number"
-        },
-        "long" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "binaryValue" : {
-          "type" : "array",
-          "items" : {
-            "type" : "string",
-            "format" : "byte"
-          }
-        },
-        "bigDecimal" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "bigInteger" : {
-          "type" : "boolean",
-          "default" : false
-        }
-      }
-    },
     "MultipartFile" : {
       "type" : "object",
       "properties" : {
         "originalFilename" : {
+          "type" : "string"
+        },
+        "contentType" : {
           "type" : "string"
         },
         "name" : {
@@ -1217,9 +1067,6 @@
         },
         "inputStream" : {
           "$ref" : "#/definitions/InputStream"
-        },
-        "contentType" : {
-          "type" : "string"
         }
       }
     },
@@ -1230,9 +1077,6 @@
           "type" : "string"
         }
       }
-    },
-    "Number" : {
-      "type" : "object"
     },
     "Observation" : {
       "type" : "object",
@@ -1325,7 +1169,7 @@
         "name" : {
           "type" : "string"
         },
-        "md5hash" : {
+        "hash" : {
           "type" : "string"
         }
       }
@@ -1385,7 +1229,7 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "voidedCount" : {
+        "voidedTableCount" : {
           "type" : "integer",
           "format" : "int64"
         },

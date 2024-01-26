@@ -10,23 +10,18 @@
 
     <!-- Add here beans related to the web context -->
 
-
     <context:component-scan base-package="org.openmrs.module.biometric.web.controller"/>
-
-    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver" p:order="1"/>
 
     <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
-            <value></value>
+            <value/>
         </property>
     </bean>
 
     <bean id="multipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <!-- one of the properties available; the maximum file size in bytes. Defined 100 KB assuming the template size wont exceed 100 kb -->
-        <property name="maxUploadSize">
-            <value>100000</value>
-        </property>
+        <property name="maxUploadSize" value="100000"/>
     </bean>
 
     <bean class="org.openmrs.ui.framework.StandardModuleUiConfiguration">

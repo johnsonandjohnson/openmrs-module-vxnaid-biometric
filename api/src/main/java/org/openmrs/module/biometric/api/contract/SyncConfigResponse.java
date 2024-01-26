@@ -10,8 +10,6 @@
 
 package org.openmrs.module.biometric.api.contract;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * This class is used for building the response for sync config api calls.
  *
@@ -20,8 +18,7 @@ public class SyncConfigResponse {
 
   private String name;
 
-  @JsonProperty("hash")
-  private String md5hash;
+  private String hash;
 
   public String getName() {
     return name;
@@ -31,11 +28,11 @@ public class SyncConfigResponse {
     this.name = name;
   }
 
-  public String getMd5hash() {
-    return md5hash;
+  public String getHash() {
+    return hash;
   }
 
-  public void setMd5hash(String md5hash) {
-    this.md5hash = md5hash;
+  public void setHash(String hash) {
+    this.hash = hash;
   }
 }

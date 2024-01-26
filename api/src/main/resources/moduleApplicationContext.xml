@@ -10,8 +10,6 @@
   		    http://www.springframework.org/schema/context
   		    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-    <context:component-scan base-package="org.openmrs.module.biometric"/>
-
     <bean id="biometric.participantService"
           class="org.openmrs.module.biometric.api.service.impl.ParticipantServiceImpl">
     </bean>
@@ -33,15 +31,11 @@
         <constructor-arg name="visitService" ref="visitService"/>
         <constructor-arg name="encounterService" ref="encounterService"/>
         <constructor-arg name="patientService" ref="patientService"/>
-        <property name="sessionFactory">
-            <ref bean="dbSessionFactory"/>
-        </property>
+        <property name="sessionFactory" ref="dbSessionFactory"/>
     </bean>
 
     <bean id="biometric.syncService" class="org.openmrs.module.biometric.api.service.impl.SyncServiceImpl">
-        <property name="syncDao">
-            <ref local="biometric.syncDao"/>
-        </property>
+        <property name="syncDao" ref="biometric.syncDao" />
     </bean>
 
     <bean id="objectMapper"

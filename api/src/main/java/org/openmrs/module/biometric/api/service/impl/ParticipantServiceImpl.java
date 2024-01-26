@@ -236,7 +236,7 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
 
   @Override
   @Transactional(readOnly = true)
-  public final List<SyncTemplateResponse> getBiometricDataByParticipantIds(Set<String> uuids) {
+  public List<SyncTemplateResponse> getBiometricDataByParticipantIds(Set<String> uuids) {
 
     NamedParameterJdbcTemplate template = util
         .getNamedParameterJdbcTemplate(dataSource, FETCH_SIZE);

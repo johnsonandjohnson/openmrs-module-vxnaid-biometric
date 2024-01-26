@@ -15,13 +15,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.codehaus.jackson.JsonNode;
 import org.openmrs.module.biometric.api.contract.LicenseResponse;
 import org.openmrs.module.biometric.api.contract.LocationResponse;
 import org.openmrs.module.biometric.api.exception.BiometricApiException;
@@ -44,6 +37,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Biometric API configuration controller
@@ -86,7 +86,7 @@ public class ConfigController extends BaseRestController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   @RequestMapping(value = "/location", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-  public Map<String, List<LocationResponse>> getLocations() throws BiometricApiException {
+  public Map<String, List<LocationResponse>> getLocations() {
     return configService.retrieveLocations();
   }
 
@@ -97,7 +97,7 @@ public class ConfigController extends BaseRestController {
    * @return biometric configurations
    */
   @ApiOperation(value = "Retrieves configuration details by name", notes = "Retrieves config details by name",
-      response = JsonNode.class)
+      response = String.class)
   @ApiResponses(value = {
       @ApiResponse(code = HttpURLConnection.HTTP_OK, message = "On successful return of config details by name"),
       @ApiResponse(code = HttpURLConnection.HTTP_INTERNAL_ERROR, message = "Failure to return config details"),
@@ -105,11 +105,10 @@ public class ConfigController extends BaseRestController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   @RequestMapping(value = "/config/{name}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-  public JsonNode getConfig(
+  public String getConfig(
       @ApiParam(name = "name", value = "name", required = true)
-      @PathVariable("name") String name) throws IOException, EntityNotFoundException {
-    return util
-        .toJsonNode(configService.retrieveConfig(SanitizeUtil.sanitizeInputString(name)));
+      @PathVariable("name") String name) throws EntityNotFoundException {
+    return configService.retrieveConfig(SanitizeUtil.sanitizeInputString(name));
   }
 
   /**
@@ -118,7 +117,7 @@ public class ConfigController extends BaseRestController {
    * @return the current version of the android app
    */
   @ApiOperation(value = "Retrieve configuration version details", notes = "Retrieve config version details",
-      response = JsonNode.class)
+      response = String.class)
   @ApiResponses(value = {
       @ApiResponse(code = HttpURLConnection.HTTP_OK, message = "On successful return of version details"),
       @ApiResponse(code = HttpURLConnection.HTTP_INTERNAL_ERROR, message = "Failure to return version details"),
@@ -126,8 +125,8 @@ public class ConfigController extends BaseRestController {
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   @RequestMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
-  public JsonNode getVersionInfo() throws IOException, EntityNotFoundException {
-    return util.toJsonNode(configService.retrieveConfig("version"));
+  public String getVersionInfo() throws EntityNotFoundException {
+    return configService.retrieveConfig("version");
   }
 
   /**
@@ -241,7 +240,7 @@ public class ConfigController extends BaseRestController {
    * @return vaccine schedule
    */
   @ApiOperation(value = "Retrieves cfl vaccines", notes = "Retrieves cfl vaccines",
-      response = JsonNode.class)
+      response = String.class)
   @ApiResponses(value = {
       @ApiResponse(code = HttpURLConnection.HTTP_OK, message = "On successful return of vaccine details"),
       @ApiResponse(code = HttpURLConnection.HTTP_INTERNAL_ERROR, message = "Failure to return vaccine details"),
@@ -250,7 +249,7 @@ public class ConfigController extends BaseRestController {
   @ResponseBody
   @RequestMapping(value = "/config/vaccine-schedule", produces = MediaType.APPLICATION_JSON_VALUE,
       method = RequestMethod.GET)
-  public JsonNode getVaccineSchedule() throws IOException, EntityNotFoundException {
-    return util.toJsonNode(configService.retrieveVaccineSchedule());
+  public String getVaccineSchedule() throws EntityNotFoundException {
+    return configService.retrieveVaccineSchedule();
   }
 }
