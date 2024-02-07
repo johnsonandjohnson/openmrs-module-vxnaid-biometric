@@ -1050,12 +1050,57 @@
     "JsonNode" : {
       "type" : "object",
       "properties" : {
+        "valueAsInt" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "valueAsLong" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "valueAsDouble" : {
+          "type" : "number",
+          "format" : "double"
+        },
+        "valueNode" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "containerNode" : {
+          "type" : "boolean",
+          "default" : false
+        },
         "missingNode" : {
           "type" : "boolean",
           "default" : false
         },
-        "bigIntegerValue" : {
-          "type" : "integer"
+        "object" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "pojo" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "integralNumber" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "floatingPointNumber" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "textual" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "binary" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "numberType" : {
+          "type" : "string",
+          "enum" : [ "INT", "LONG", "BIG_INTEGER", "FLOAT", "DOUBLE", "BIG_DECIMAL" ]
         },
         "textValue" : {
           "type" : "string"
@@ -1067,13 +1112,8 @@
           "type" : "integer",
           "format" : "int32"
         },
-        "numberType" : {
-          "type" : "string",
-          "enum" : [ "INT", "LONG", "BIG_INTEGER", "FLOAT", "DOUBLE", "BIG_DECIMAL" ]
-        },
-        "valueNode" : {
-          "type" : "boolean",
-          "default" : false
+        "bigIntegerValue" : {
+          "type" : "integer"
         },
         "valueAsText" : {
           "type" : "string"
@@ -1081,58 +1121,7 @@
         "fieldNames" : {
           "$ref" : "#/definitions/IteratorString"
         },
-        "object" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "pojo" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "containerNode" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "binary" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "integralNumber" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "textual" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "floatingPointNumber" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "valueAsLong" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "valueAsDouble" : {
-          "type" : "number",
-          "format" : "double"
-        },
-        "valueAsInt" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
         "valueAsBoolean" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "array" : {
-          "type" : "boolean",
-          "default" : false
-        },
-        "fields" : {
-          "$ref" : "#/definitions/IteratorEntryStringJsonNode"
-        },
-        "null" : {
           "type" : "boolean",
           "default" : false
         },
@@ -1170,10 +1159,6 @@
         "decimalValue" : {
           "type" : "number"
         },
-        "long" : {
-          "type" : "boolean",
-          "default" : false
-        },
         "binaryValue" : {
           "type" : "array",
           "items" : {
@@ -1181,11 +1166,26 @@
             "format" : "byte"
           }
         },
+        "long" : {
+          "type" : "boolean",
+          "default" : false
+        },
         "bigDecimal" : {
           "type" : "boolean",
           "default" : false
         },
         "bigInteger" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "array" : {
+          "type" : "boolean",
+          "default" : false
+        },
+        "fields" : {
+          "$ref" : "#/definitions/IteratorEntryStringJsonNode"
+        },
+        "null" : {
           "type" : "boolean",
           "default" : false
         }
@@ -1195,6 +1195,9 @@
       "type" : "object",
       "properties" : {
         "originalFilename" : {
+          "type" : "string"
+        },
+        "contentType" : {
           "type" : "string"
         },
         "name" : {
@@ -1217,9 +1220,6 @@
         },
         "inputStream" : {
           "$ref" : "#/definitions/InputStream"
-        },
-        "contentType" : {
-          "type" : "string"
         }
       }
     },
