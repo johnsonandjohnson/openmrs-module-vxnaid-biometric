@@ -26,6 +26,16 @@ public class PatientRecord {
 
   private String birthDate;
 
+  private String nin;
+
+  public String getNin() {
+    return nin;
+  }
+
+  public void setNin(String nin) {
+    this.nin = nin;
+  }
+
   private Map<String, String> addresses;
 
   private List<AttributeData> attributes;
