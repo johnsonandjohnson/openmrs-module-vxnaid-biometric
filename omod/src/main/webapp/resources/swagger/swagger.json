@@ -454,6 +454,12 @@
         "description" : "Retrieves list of matched participants",
         "operationId" : "match",
         "parameters" : [ {
+          "name" : "nin",
+          "in" : "query",
+          "description" : "NIN of a participant",
+          "required" : false,
+          "type" : "string"
+        }, {
           "in" : "body",
           "name" : "template",
           "description" : "Iris template",
@@ -1140,6 +1146,9 @@
           "enum" : [ "M", "F", "O" ]
         },
         "birthDate" : {
+          "type" : "string"
+        },
+        "nin" : {
           "type" : "string"
         },
         "addresses" : {
