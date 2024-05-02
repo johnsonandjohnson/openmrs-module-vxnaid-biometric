@@ -36,9 +36,9 @@
 
     <openmrs.platform.version>2.0.1</openmrs.platform.version>
     <addressHierarchyVersion>2.11.0</addressHierarchyVersion>
-    <licenseManagementVersion>1.1.3</licenseManagementVersion>
+    <licenseManagementVersion>1.1.5</licenseManagementVersion>
     <openmrsApiVersion>2.0.1</openmrsApiVersion>
-    <visitApiVersion>1.3.5</visitApiVersion>
+    <visitApiVersion>1.6.0</visitApiVersion>
     <coreappsVersion>1.21.0</coreappsVersion>
 
     <neurotech.api.version>11.2.0.0</neurotech.api.version>

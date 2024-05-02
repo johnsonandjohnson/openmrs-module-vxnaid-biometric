@@ -32,6 +32,16 @@ public class RegisterRequest {
 
   private int age;
 
+  private String Nin;
+
+  public String getNin() {
+    return Nin;
+  }
+
+  public void setNin(String nin) {
+    Nin = nin;
+  }
+
   private List<Address> addresses;
 
   private List<AttributeData> attributes;
