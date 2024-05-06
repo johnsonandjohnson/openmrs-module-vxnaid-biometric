@@ -71,10 +71,13 @@ public class PatientBuilder {
     patient.setDateChanged(new Date());
     patient.setPersonDateChanged(new Date());
     patient.setGender(request.getGender());
+
     patient.setBirthdate(util.convertIsoStringToDate(request.getBirthdate()));
     PatientIdentifierType patientIdentifierType = patientService
         .getPatientIdentifierTypeByName(OPEN_MRS_ID);
     PatientIdentifier patientIdentifier = new PatientIdentifier();
+
+
 
     patientIdentifier.setIdentifierType(patientIdentifierType);
     //remove all white space characters in the participant id
@@ -82,6 +85,20 @@ public class PatientBuilder {
     patientIdentifier.setIdentifier(participantId);
     patientIdentifier.setPreferred(Boolean.TRUE);
 
+    String nantionIdNumber = request.getNin();
+    if(nantionIdNumber !=null && !nantionIdNumber.isEmpty()) {
+      PersonAttribute ninAttribute  = new PersonAttribute();
+      ninAttribute.setValue(nantionIdNumber);
+      //assuming "national id number is the name of attribute type for NIN"
+      PersonAttributeType ninAttributeType = personService.getPersonAttributeTypeByName(nantionIdNumber);
+      if(ninAttributeType == null) {
+        throw new EntityNotFoundException("National ID od attribute type doesnt exisit");
+      }
+      ninAttribute.setAttributeType(ninAttributeType);
+      patient.addAttribute(ninAttribute);
+    }
+
+    
     String locationUuid = locationUtil.getLocationUuid(request.getAttributes());
     patientIdentifier.setLocation(locationUtil.getLocationByUuid(locationUuid));
     patient.addIdentifier(patientIdentifier);
