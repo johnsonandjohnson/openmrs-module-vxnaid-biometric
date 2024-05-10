@@ -39,6 +39,7 @@ public final class BiometricApiConstants {
   public static final String LOCALIZATION_GP = GP_PREFIX + ".localization";
   public static final String PERSON_IMAGE_ATTRIBUTE = "PersonImageAttribute";
   public static final String PERSON_TEMPLATE_ATTRIBUTE = "PersonTemplateAttribute";
+  public static final String NIN_IDENTIFIER_NAME = "National ID";
 
   private BiometricApiConstants() {
   }

@@ -3,11 +3,10 @@
  * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
  * http://openmrs.org/license.
- * <p>
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ *
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
  * trademark of OpenMRS Inc.
  */
-
 package org.openmrs.module.biometric.builder;
 
 import static org.openmrs.module.biometric.constants.BiometricModConstants.OPEN_MRS_ID;
@@ -17,6 +16,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
@@ -26,6 +26,7 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.PersonName;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
+import org.openmrs.module.biometric.api.constants.BiometricApiConstants;
 import org.openmrs.module.biometric.api.exception.EntityNotFoundException;
 import org.openmrs.module.biometric.api.model.AttributeData;
 import org.openmrs.module.biometric.contract.Address;
@@ -35,26 +36,20 @@ import org.openmrs.module.biometric.util.LocationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * Patient Builder
- */
+/** Patient Builder */
 @Component
 public class PatientBuilder {
 
   private static final String GIVEN_NAME = "NA";
   private static final String FIRST_SYNC_DATE = "firstSyncDate";
 
-  @Autowired
-  private BiometricModUtil util;
+  @Autowired private BiometricModUtil util;
 
-  @Autowired
-  private LocationUtil locationUtil;
+  @Autowired private LocationUtil locationUtil;
 
-  @Autowired
-  private PatientService patientService;
+  @Autowired private PatientService patientService;
 
-  @Autowired
-  private PersonService personService;
+  @Autowired private PersonService personService;
 
   /**
    * Creates Patient entity from @code {RegistrationRequest}
@@ -73,45 +68,34 @@ public class PatientBuilder {
     patient.setGender(request.getGender());
 
     patient.setBirthdate(util.convertIsoStringToDate(request.getBirthdate()));
-    PatientIdentifierType patientIdentifierType = patientService
-        .getPatientIdentifierTypeByName(OPEN_MRS_ID);
+
+    PatientIdentifierType patientIdentifierType =
+        patientService.getPatientIdentifierTypeByName(OPEN_MRS_ID);
     PatientIdentifier patientIdentifier = new PatientIdentifier();
-
-
-
     patientIdentifier.setIdentifierType(patientIdentifierType);
-    //remove all white space characters in the participant id
+    // remove all white space characters in the participant id
     String participantId = util.removeWhiteSpaces(request.getParticipantId());
     patientIdentifier.setIdentifier(participantId);
     patientIdentifier.setPreferred(Boolean.TRUE);
 
-    String nantionIdNumber = request.getNin();
-    if(nantionIdNumber !=null && !nantionIdNumber.isEmpty()) {
-      PersonAttribute ninAttribute  = new PersonAttribute();
-      ninAttribute.setValue(nantionIdNumber);
-      //assuming "national id number is the name of attribute type for NIN"
-      PersonAttributeType ninAttributeType = personService.getPersonAttributeTypeByName(nantionIdNumber);
-      if(ninAttributeType == null) {
-        throw new EntityNotFoundException("National ID od attribute type doesnt exisit");
-      }
-      ninAttribute.setAttributeType(ninAttributeType);
-      patient.addAttribute(ninAttribute);
+    if (StringUtils.isNotBlank(request.getNin())) {
+      setNin(patient, request.getNin());
     }
 
-    
     String locationUuid = locationUtil.getLocationUuid(request.getAttributes());
     patientIdentifier.setLocation(locationUtil.getLocationByUuid(locationUuid));
     patient.addIdentifier(patientIdentifier);
 
-    // store first sync date of a participant, actual registration date will be stored in dateCreated field
+    // store first sync date of a participant, actual registration date will be stored in
+    // dateCreated field
     List<AttributeData> attributes = request.getAttributes();
     attributes.add(util.createAttribute(FIRST_SYNC_DATE, util.dateToISO8601(new Date())));
 
     for (AttributeData attr : attributes) {
       PersonAttribute attribute = new PersonAttribute();
       attribute.setValue(attr.getValue());
-      PersonAttributeType personAttributeType = personService
-          .getPersonAttributeTypeByName(attr.getType());
+      PersonAttributeType personAttributeType =
+          personService.getPersonAttributeTypeByName(attr.getType());
       if (null == personAttributeType) {
         throw new EntityNotFoundException(
             String.format("Attribute type : %s does not exists", attr.getType()));
@@ -134,9 +118,25 @@ public class PatientBuilder {
     }
     patient.setAddresses(personAddresses);
     PersonName personName = new PersonName();
-    //currently hardcoded,  as the name is currently not captured
+    // currently hardcoded,  as the name is currently not captured
     personName.setGivenName(GIVEN_NAME);
     patient.addName(personName);
     return patient;
+  }
+
+  private void setNin(Patient patient, String nationalIdNumber) {
+    PersonAttributeType ninAttributeType =
+        personService.getPersonAttributeTypeByName(BiometricApiConstants.NIN_IDENTIFIER_NAME);
+    if (ninAttributeType == null) {
+      throw new IllegalStateException(
+          "Missing Uganda National ID identifier, missing "
+              + "PatientIdentifier.name="
+              + BiometricApiConstants.NIN_IDENTIFIER_NAME);
+    }
+
+    PersonAttribute ninAttribute = new PersonAttribute();
+    ninAttribute.setValue(nationalIdNumber);
+    ninAttribute.setAttributeType(ninAttributeType);
+    patient.addAttribute(ninAttribute);
   }
 }
