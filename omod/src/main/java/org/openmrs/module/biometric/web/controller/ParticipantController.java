@@ -281,7 +281,6 @@ public class ParticipantController extends BaseRestController {
    * @param participantId participant's id
    * @param phone participant's phone
    * @param country participant's country
-   * @param NIN participant's NIN
    * @return list of matched participants details by biometric template/phone/identifier ot
    * combination of these
    */
@@ -307,12 +306,6 @@ public class ParticipantController extends BaseRestController {
   @RequestMapping(value = "/match", consumes = {
       MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
   public List<ParticipantMatchResponse> match(
- 
-
-      @ApiParam(name = "nin", value = "NIN of a participant", required = false)
-      @RequestParam(value = "nin", required = false)
-      String nin,
-
       @ApiParam(name = "template", value = "Iris template", required = false)
       @RequestParam(value = TEMPLATE, required = false)
           MultipartFile template,

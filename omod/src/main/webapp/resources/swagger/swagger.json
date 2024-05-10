@@ -454,12 +454,6 @@
         "description" : "Retrieves list of matched participants",
         "operationId" : "match",
         "parameters" : [ {
-          "name" : "nin",
-          "in" : "query",
-          "description" : "NIN of a participant",
-          "required" : false,
-          "type" : "string"
-        }, {
           "in" : "body",
           "name" : "template",
           "description" : "Iris template",
@@ -1050,9 +1044,6 @@
         "originalFilename" : {
           "type" : "string"
         },
-        "contentType" : {
-          "type" : "string"
-        },
         "name" : {
           "type" : "string"
         },
@@ -1073,6 +1064,9 @@
         },
         "inputStream" : {
           "$ref" : "#/definitions/InputStream"
+        },
+        "contentType" : {
+          "type" : "string"
         }
       }
     },

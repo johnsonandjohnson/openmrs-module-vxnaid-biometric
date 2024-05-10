@@ -4,19 +4,16 @@
  * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
  * http://openmrs.org/license.
  *
- * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is
- * a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
-
 package org.openmrs.module.biometric.contract;
 
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.openmrs.module.biometric.api.model.AttributeData;
 
-/**
- * Register request contract used in request to register participant.
- */
+/** Register request contract used in request to register participant. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterRequest {
 
@@ -32,23 +29,13 @@ public class RegisterRequest {
 
   private int age;
 
-  private String Nin;
-
-  public String getNin() {
-    return Nin;
-  }
-
-  public void setNin(String nin) {
-    Nin = nin;
-  }
+  private String nin;
 
   private List<Address> addresses;
 
   private List<AttributeData> attributes;
 
-  /**
-   * base64 encoded format of the participant;s image
-   */
+  /** base64 encoded format of the participant's image */
   private String image;
 
   public String getParticipantUuid() {
@@ -97,6 +84,14 @@ public class RegisterRequest {
 
   public void setAge(int age) {
     this.age = age;
+  }
+
+  public String getNin() {
+    return nin;
+  }
+
+  public void setNin(String nin) {
+    this.nin = nin;
   }
 
   public List<Address> getAddresses() {
