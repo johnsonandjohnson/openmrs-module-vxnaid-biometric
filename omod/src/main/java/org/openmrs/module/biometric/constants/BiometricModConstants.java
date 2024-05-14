@@ -21,8 +21,6 @@ public final class BiometricModConstants {
 
   public static final String DEVICE_ID = "deviceId";
 
-  public static final String ENABLE_BIOMETRIC = "biometric.enable.biometric.feature";
-
   private BiometricModConstants() {
 
   }

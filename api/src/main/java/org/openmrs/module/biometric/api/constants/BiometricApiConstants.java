@@ -40,6 +40,7 @@ public final class BiometricApiConstants {
   public static final String PERSON_IMAGE_ATTRIBUTE = "PersonImageAttribute";
   public static final String PERSON_TEMPLATE_ATTRIBUTE = "PersonTemplateAttribute";
   public static final String NIN_IDENTIFIER_NAME = "National ID";
+  public static final String ENABLE_BIOMETRIC = "biometric.enable.biometric.feature";
 
   private BiometricApiConstants() {
   }

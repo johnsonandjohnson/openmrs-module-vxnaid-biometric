@@ -125,18 +125,19 @@ public class PatientBuilder {
   }
 
   private void setNin(Patient patient, String nationalIdNumber) {
-    PersonAttributeType ninAttributeType =
-        personService.getPersonAttributeTypeByName(BiometricApiConstants.NIN_IDENTIFIER_NAME);
-    if (ninAttributeType == null) {
+    PatientIdentifierType ninIdentifierType =
+        patientService.getPatientIdentifierTypeByName(BiometricApiConstants.NIN_IDENTIFIER_NAME);
+    if (ninIdentifierType == null) {
       throw new IllegalStateException(
           "Missing Uganda National ID identifier, missing "
               + "PatientIdentifier.name="
               + BiometricApiConstants.NIN_IDENTIFIER_NAME);
     }
 
-    PersonAttribute ninAttribute = new PersonAttribute();
-    ninAttribute.setValue(nationalIdNumber);
-    ninAttribute.setAttributeType(ninAttributeType);
-    patient.addAttribute(ninAttribute);
+    PatientIdentifier nin = new PatientIdentifier();
+    nin.setIdentifierType(ninIdentifierType);
+    nin.setIdentifier(util.removeWhiteSpaces(nationalIdNumber));
+    nin.setPreferred(Boolean.FALSE);
+    patient.addIdentifier(nin);
   }
 }

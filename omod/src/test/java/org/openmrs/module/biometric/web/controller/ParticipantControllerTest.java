@@ -56,6 +56,7 @@ import org.openmrs.module.biometric.api.contract.BiometricMatchingResult;
 import org.openmrs.module.biometric.api.contract.PatientResponse;
 import org.openmrs.module.biometric.api.service.BiometricService;
 import org.openmrs.module.biometric.api.service.ParticipantService;
+import org.openmrs.module.biometric.api.util.BiometricApiUtil;
 import org.openmrs.module.biometric.builder.MatchResponseBuilder;
 import org.openmrs.module.biometric.builder.ParticipantMatchResponseBuilder;
 import org.openmrs.module.biometric.builder.PatientBuilder;
@@ -117,6 +118,9 @@ public class ParticipantControllerTest {
 
   @Mock
   private ObjectMapper objectMapper;
+
+  @Mock
+  private BiometricApiUtil biometricApiUtil;
 
   @Mock
   private BiometricModUtil util;
@@ -698,7 +702,7 @@ public class ParticipantControllerTest {
     Patient patient = TestUtil.createPatient(TestUtil.createPerson());
     when(Context.getPatientService()).thenReturn(patientService);
     when(Context.getPatientService().getPatientByUuid(anyString())).thenReturn(patient);
-    when(util.isBiometricFeatureEnabled()).thenReturn(false);
+    when(biometricApiUtil.isBiometricFeatureEnabled()).thenReturn(false);
     mockMvc.perform(put(ControllerTestHelper.BASE_URL + "/participant/{personUuid}", PERSON_UUID)
         .param("reason", "Deleting participant")
         .contentType(MediaType.TEXT_PLAIN))
@@ -711,7 +715,7 @@ public class ParticipantControllerTest {
     Patient patient = TestUtil.createPatient(TestUtil.createPerson());
     when(Context.getPatientService()).thenReturn(patientService);
     when(Context.getPatientService().getPatientByUuid(anyString())).thenReturn(null);
-    when(util.isBiometricFeatureEnabled()).thenReturn(false);
+    when(biometricApiUtil.isBiometricFeatureEnabled()).thenReturn(false);
     mockMvc.perform(put(ControllerTestHelper.BASE_URL + "/participant/{personUuid}", PERSON_UUID)
         .param("reason", "Deleting participant")
         .contentType(MediaType.TEXT_PLAIN))
@@ -724,7 +728,7 @@ public class ParticipantControllerTest {
     Patient patient = TestUtil.createPatient(TestUtil.createPerson());
     when(Context.getPatientService()).thenReturn(patientService);
     when(Context.getPatientService().getPatientByUuid(anyString())).thenReturn(patient);
-    when(util.isBiometricFeatureEnabled()).thenReturn(true);
+    when(biometricApiUtil.isBiometricFeatureEnabled()).thenReturn(true);
     mockMvc.perform(put(ControllerTestHelper.BASE_URL + "/participant/{personUuid}", PERSON_UUID)
         .param("reason", "Deleting participant")
         .contentType(MediaType.TEXT_PLAIN))

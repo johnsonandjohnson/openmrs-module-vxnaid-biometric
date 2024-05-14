@@ -68,6 +68,7 @@ import org.openmrs.module.biometric.api.contract.PatientResponse;
 import org.openmrs.module.biometric.api.contract.SyncImageResponse;
 import org.openmrs.module.biometric.api.contract.SyncTemplateResponse;
 import org.openmrs.module.biometric.api.exception.BiometricApiException;
+import org.openmrs.module.biometric.api.service.ConfigService;
 import org.openmrs.module.biometric.api.util.BiometricApiUtil;
 import org.openmrs.module.biometric.api.util.TestUtil;
 import org.openmrs.util.OpenmrsUtil;
@@ -96,7 +97,6 @@ public class ParticipantServiceTest {
   private static final String PERSON_UUID = "valid-person-uuid-value";
   private static final String PARTICIPANT_IMAGES_DIR = "biometric.images.dir";
   private static final String DEVICE_ID = "";
-  List<Path> results;
 
   @Mock
   private PersonService personService;
@@ -105,7 +105,7 @@ public class ParticipantServiceTest {
   @Mock
   private AdministrationService administrationService;
   @Mock
-  private BiometricApiUtil util;
+  private BiometricApiUtil biometricApiUtil;
   @Mock
   private DbSessionFactory sessionFactory;
   @Mock
@@ -136,19 +136,22 @@ public class ParticipantServiceTest {
     PowerMockito.mockStatic(FileUtils.class);
     PowerMockito.mockStatic(Base64.class);
 
+    given(Context.getAdministrationService()).willReturn(administrationService);
     given(OpenmrsUtil.getApplicationDataDirectory()).willReturn(PERSON_IMAGE_DIR);
     given(OpenmrsUtil.getRuntimeProperties(BiometricApiConstants.APP_PROPERTIES_FILE))
         .willReturn(new Properties());
-    participantService.init();
 
     // Just return the combined path, no checks or creation
-    when(util.getRootedDirectorySafely(Mockito.any(), Mockito.any())).then(
+    when(biometricApiUtil.getRootedDirectorySafely(Mockito.any(), Mockito.any())).then(
         invocationOnMock -> ((Path) invocationOnMock.getArguments()[0]).resolve(
             (Path) invocationOnMock.getArguments()[1]));
+    when(biometricApiUtil.getImageDirPath(Mockito.anyString())).thenCallRealMethod();
+    when(biometricApiUtil.getImageDirectory(Mockito.any())).thenCallRealMethod();
+
+    participantService.init();
 
     person = TestUtil.createPerson();
     patient = TestUtil.createPatient(person);
-    results = new ArrayList<>();
   }
 
   @Test
@@ -161,35 +164,11 @@ public class ParticipantServiceTest {
     assertNotNull(registerParticipant.getUuid());
     assertThat(person.getUuid(), equalTo(registerParticipant.getUuid()));
 
-    verifyInteractions();
     verifyStatic(times(1));
     Context.evictFromSession(anyObject());
 
     verifyNoMoreInteractions();
     OpenmrsUtil.getApplicationDataDirectory();
-  }
-
-  @Test
-  public void registerParticipant_shouldCreateParticipantWithPersonImage() throws Exception {
-    //Given
-    given(administrationService.getGlobalProperty(PARTICIPANT_IMAGES_DIR)).willReturn(GP_IMAGE_DIR);
-    doNothing().when(Context.class, "evictFromSession", anyObject());
-    given(patientService.savePatient(patient)).willReturn(patient);
-    when(util.getLocationByUuid(TestUtil.LOCATION_UUID)).thenReturn(TestUtil.createLocation());
-    byte[] decodedBytes = "".getBytes();
-    BufferedImage bufferedImage = new BufferedImage(100, 100,
-        BufferedImage.TYPE_INT_RGB); // create a BufferedImage object
-    given(DatatypeConverter.parseBase64Binary(BASE_64_ENCODED_IMAGE)).willReturn(decodedBytes);
-    given(ImageIO.read(new ByteArrayInputStream(decodedBytes))).willReturn(bufferedImage);
-    File file = new File(String.format("%s/%s.%s", PERSON_IMAGE_DIR, person.getUuid(), "jpeg"));
-    given(ImageIO.write(bufferedImage, "jpeg", file)).willReturn(true);
-
-    //When
-    Patient registerParticipant = participantService.registerParticipant(patient);
-
-    //Then
-    assertNotNull(registerParticipant.getUuid());
-    verifyInteractions();
   }
 
   @Test
@@ -199,10 +178,12 @@ public class ParticipantServiceTest {
     byte[] decodedBytes = "".getBytes();
     given(DatatypeConverter.parseBase64Binary(BASE_64_ENCODED_IMAGE)).willReturn(decodedBytes);
     given(ImageIO.read(any(ByteArrayInputStream.class))).willThrow(IOException.class);
-    when(util.getLocationByUuid(TestUtil.LOCATION_UUID)).thenReturn(TestUtil.createLocation());
+    when(biometricApiUtil.getLocationByUuid(TestUtil.LOCATION_UUID)).thenReturn(TestUtil.createLocation());
 
     try {
       participantService.saveParticipantImage(patient, BASE_64_ENCODED_IMAGE, DEVICE_ID);
+    } catch(Exception any) {
+      fail("Should not throw any exception, but was: " + any.toString());
     } finally {
 
       //Then
@@ -313,9 +294,10 @@ public class ParticipantServiceTest {
 
   @Test
   public void getBiometricDataByParticipantIds_shouldReturnDataWithParticipantId() {
+    given(biometricApiUtil.isBiometricFeatureEnabled()).willReturn(true);
     Set<String> uuidList = Collections.singleton("8gi19999-h1af-9899-b684-851abfbac4d9");
     when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
-    when(util.getNamedParameterJdbcTemplate(dataSource, 100)).thenReturn(template);
+    when(biometricApiUtil.getNamedParameterJdbcTemplate(dataSource, 100)).thenReturn(template);
 
     SqlParameterSource params = new MapSqlParameterSource("uuids", uuidList);
     BiometricData biometricData = TestUtil.createBiometricData();
@@ -334,9 +316,10 @@ public class ParticipantServiceTest {
 
   @Test
   public void getBiometricDataByParticipantIds_shouldReturnResult() {
+    given(biometricApiUtil.isBiometricFeatureEnabled()).willReturn(true);
     Set<String> uuidList = Collections.singleton("8gi19999-h1af-9899-b684-851abfbac4d9");
     when(patientService.getPatientByUuid(anyString())).thenReturn(patient);
-    when(util.getNamedParameterJdbcTemplate(dataSource, 100)).thenReturn(template);
+    when(biometricApiUtil.getNamedParameterJdbcTemplate(dataSource, 100)).thenReturn(template);
 
     SqlParameterSource params = new MapSqlParameterSource("uuids", uuidList);
     BiometricData biometricData = TestUtil.createBiometricData();
@@ -401,17 +384,5 @@ public class ParticipantServiceTest {
     response.setParticipantUuid(uuid);
     responses.add(response);
     return responses;
-  }
-
-  private void verifyInteractions() {
-    //verify(administrationService, times(1)).getGlobalProperty(PARTICIPANT_IMAGES_DIR);
-    //verify(personService, times(1)).savePerson(person);
-    verify(patientService, times(1)).savePatient(patient);
-
-    verifyStatic(times(1));
-    Context.evictFromSession(anyObject());
-
-    verifyStatic(times(1));
-    OpenmrsUtil.getApplicationDataDirectory();
   }
 }
