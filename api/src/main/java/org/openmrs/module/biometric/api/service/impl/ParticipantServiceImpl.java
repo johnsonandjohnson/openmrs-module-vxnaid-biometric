@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -119,7 +120,7 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
 
   @Transactional(rollbackFor = BiometricApiException.class)
   @Override
-  public final Patient registerParticipant(Patient patientObj) throws
+  public Patient registerParticipant(Patient patientObj) throws
       BiometricApiException {
 
     if (null != patientService.getPatientByUuid(patientObj.getUuid())) {
@@ -132,25 +133,25 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
 
   @Transactional
   @Override
-  public final Patient updateParticipant(Patient patient) {
+  public Patient updateParticipant(Patient patient) {
     return patientService.savePatient(patient);
   }
 
   @Transactional
   @Override
-  public final void voidPatient(Patient patient, String reason) {
+  public void voidPatient(Patient patient, String reason) {
     Context.getPatientService().voidPatient(patient, reason);
   }
 
   @Transactional(readOnly = true)
   @Override
-  public final List<Patient> retrieveParticipantDetails(String patientIdentifier) {
+  public List<Patient> retrieveParticipantDetails(String patientIdentifier) {
     return patientService.getPatients(null, patientIdentifier, null, false);
   }
 
   @Transactional(readOnly = true)
   @Override
-  public final List<PatientResponse> findByPhone(String phone)
+  public List<PatientResponse> findByPhone(String phone)
       throws BiometricApiException, IOException {
     Criteria criteria = getSession().createCriteria(PersonAttribute.class);
     criteria.add(Restrictions.like(ATTR_VALUE, phone, MatchMode.EXACT));
@@ -168,7 +169,7 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
 
   @Override
   @Transactional(readOnly = true)
-  public final List<PatientResponse> findByParticipantId(String participantId) throws IOException,
+  public List<PatientResponse> findByParticipantId(String participantId) throws IOException,
       BiometricApiException {
     PatientIdentifierType type = patientService.getPatientIdentifierTypeByName(OPEN_MRS_ID);
     List<PatientIdentifierType> types = new ArrayList<>();
@@ -184,7 +185,7 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
   }
 
   @Override
-  public final void saveParticipantImage(Person person, String base64EncodedImage,
+  public void saveParticipantImage(Person person, String base64EncodedImage,
       String deviceId) throws BiometricApiException {
 
     try {
@@ -208,21 +209,21 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
   }
 
   @Override
-  public final Optional<String> retrieveParticipantImage(String personUuid)
+  public Optional<String> retrieveParticipantImage(String personUuid)
       throws IOException, BiometricApiException {
     Optional<File> imageFile = retrievePersonImage(personUuid);
     return imageFile.map(this::convertFileToBase64String);
   }
 
   @Override
-  public final List<PatientResponse> findPatientsByUuids(Set<String> uuids)
+  public List<PatientResponse> findPatientsByUuids(Set<String> uuids)
       throws BiometricApiException,
       IOException {
     return buildPatientResponse(getPatients(uuids));
   }
 
   @Override
-  public final List<SyncImageResponse> findImagesByUuids(Set<String> uuids) throws IOException {
+  public List<SyncImageResponse> findImagesByUuids(Set<String> uuids) throws IOException {
     List<Path> results;
     Path path = util.getImageDirPath(personImagesDir);
     try (Stream<Path> walk = Files.walk(path)) {
@@ -237,6 +238,9 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
   @Override
   @Transactional(readOnly = true)
   public List<SyncTemplateResponse> getBiometricDataByParticipantIds(Set<String> uuids) {
+    if(!util.isBiometricFeatureEnabled()) {
+      return Collections.emptyList();
+    }
 
     NamedParameterJdbcTemplate template = util
         .getNamedParameterJdbcTemplate(dataSource, FETCH_SIZE);

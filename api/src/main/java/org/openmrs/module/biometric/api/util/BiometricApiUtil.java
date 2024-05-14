@@ -11,6 +11,7 @@
 package org.openmrs.module.biometric.api.util;
 
 import static org.openmrs.module.biometric.api.constants.BiometricApiConstants.DEFAULT_PARTICIPANT_IMAGES_DIR;
+import static org.openmrs.module.biometric.api.constants.BiometricApiConstants.ENABLE_BIOMETRIC;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -177,7 +178,7 @@ public class BiometricApiUtil {
     return resultDirPath;
   }
 
-  public final String getImageDirectory(Properties properties) throws BiometricApiException {
+  public String getImageDirectory(Properties properties) throws BiometricApiException {
     String defaultDir = OpenmrsUtil.getApplicationDataDirectory() + DEFAULT_PARTICIPANT_IMAGES_DIR;
     String personImagesDir = properties
         .getProperty(BiometricApiConstants.PARTICIPANT_IMAGES_DIR, defaultDir);
@@ -196,7 +197,7 @@ public class BiometricApiUtil {
    * @return @see java.nio.file.Path
    */
   @SuppressWarnings("findsecbugs:PATH_TRAVERSAL_IN")
-  public final Path getImageDirPath(String imagePathStr) {
+  public Path getImageDirPath(String imagePathStr) {
     // the sonar warning can be suppressed as the path is not coming from the input
     return Paths.get(imagePathStr).normalize();
   }
@@ -208,7 +209,7 @@ public class BiometricApiUtil {
    * @param attributeType attribute type
    * @param attributeValue value of an attribute
    */
-  public final void setPersonAttributeValue(String patientUuid, String attributeType,
+  public void setPersonAttributeValue(String patientUuid, String attributeType,
       String attributeValue) {
     PersonService personService = Context.getPersonService();
     Patient patient = Context.getPatientService().getPatientByUuid(patientUuid);
@@ -227,6 +228,15 @@ public class BiometricApiUtil {
       }
       personService.savePerson(patient);
     }
+  }
+
+  /**
+   * Check if the biometric feature is enabled or not.
+   *
+   * @return true if it is enabled
+   */
+  public boolean isBiometricFeatureEnabled() {
+    return Boolean.parseBoolean(Context.getAdministrationService().getGlobalProperty(ENABLE_BIOMETRIC));
   }
 
   private String getPersonAddressPropertyByField(PersonAddress address, String property)

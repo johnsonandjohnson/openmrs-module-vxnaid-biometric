@@ -10,8 +10,6 @@
 
 package org.openmrs.module.biometric.util;
 
-import static org.openmrs.module.biometric.constants.BiometricModConstants.ENABLE_BIOMETRIC;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -262,16 +260,6 @@ public class BiometricModUtil {
    */
   public boolean isParticipantExists(String personUuid) {
     return null != Context.getPersonService().getPersonByUuid(personUuid);
-  }
-
-  /**
-   * Check if the biometric feature is enabled or not.
-   *
-   * @return true if it is enabled
-   */
-  public boolean isBiometricFeatureEnabled() {
-    return Boolean.parseBoolean(Context.getAdministrationService().getGlobalProperty(ENABLE_BIOMETRIC));
-
   }
 
   /**
