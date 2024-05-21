@@ -86,7 +86,7 @@ public class PatientBuilder {
     patientIdentifier.setLocation(locationUtil.getLocationByUuid(locationUuid));
     patient.addIdentifier(patientIdentifier);
 
-    // store first sync date of a participant. actual registration date will be stored in dateCreated field
+    // store first sync date of a participant, actual registration date will be stored in dateCreated field
     List<AttributeData> attributes = request.getAttributes();
     attributes.add(util.createAttribute(FIRST_SYNC_DATE, util.dateToISO8601(new Date())));
 
