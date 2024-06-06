@@ -17,7 +17,7 @@
 
   <scm>
     <connection>scm:git:https://github.com/johnsonandjohnson/openmrs-module-vxnaid-biometric.git</connection>
-    <developerConnection>scm:git:https://github.com/johnsonandjohnson/openmrs-module-vxnaid-biometric .git</developerConnection>
+    <developerConnection>scm:git:https://github.com/johnsonandjohnson/openmrs-module-vxnaid-biometric.git</developerConnection>
     <url>https://github.com/johnsonandjohnson/openmrs-module-vxnaid-biometric.git</url>
     <tag>HEAD</tag>
   </scm>
