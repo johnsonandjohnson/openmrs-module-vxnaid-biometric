@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
@@ -69,6 +70,9 @@ public class PatientBuilder {
 
     patient.setBirthdate(util.convertIsoStringToDate(request.getBirthdate()));
 
+    String locationUuid = locationUtil.getLocationUuid(request.getAttributes());
+    Location location = locationUtil.getLocationByUuid(locationUuid);
+
     PatientIdentifierType patientIdentifierType =
         patientService.getPatientIdentifierTypeByName(OPEN_MRS_ID);
     PatientIdentifier patientIdentifier = new PatientIdentifier();
@@ -77,14 +81,12 @@ public class PatientBuilder {
     String participantId = util.removeWhiteSpaces(request.getParticipantId());
     patientIdentifier.setIdentifier(participantId);
     patientIdentifier.setPreferred(Boolean.TRUE);
-
-    if (StringUtils.isNotBlank(request.getNin())) {
-      setNin(patient, request.getNin());
-    }
-
-    String locationUuid = locationUtil.getLocationUuid(request.getAttributes());
     patientIdentifier.setLocation(locationUtil.getLocationByUuid(locationUuid));
     patient.addIdentifier(patientIdentifier);
+
+    if (StringUtils.isNotBlank(request.getNin())) {
+      setNin(patient, request.getNin(), location);
+    }
 
     // store first sync date of a participant, actual registration date will be stored in
     // dateCreated field
@@ -124,7 +126,7 @@ public class PatientBuilder {
     return patient;
   }
 
-  private void setNin(Patient patient, String nationalIdNumber) {
+  private void setNin(Patient patient, String nationalIdNumber, Location location) {
     PatientIdentifierType ninIdentifierType =
         patientService.getPatientIdentifierTypeByName(BiometricApiConstants.NIN_IDENTIFIER_NAME);
     if (ninIdentifierType == null) {
@@ -138,6 +140,7 @@ public class PatientBuilder {
     nin.setIdentifierType(ninIdentifierType);
     nin.setIdentifier(util.removeWhiteSpaces(nationalIdNumber));
     nin.setPreferred(Boolean.FALSE);
+    nin.setLocation(location);
     patient.addIdentifier(nin);
   }
 }
