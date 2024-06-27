@@ -113,7 +113,7 @@ public class PatientBuilderTest {
     verify(patientService, times(1)).getPatientIdentifierTypeByName(anyString());
     verify(personService, times(4)).getPersonAttributeTypeByName(anyString());
     verify(locationUtil, times(1)).getLocationUuid(request.getAttributes());
-    verify(locationUtil, times(1)).getLocationByUuid(LOCATION_UUID);
+    verify(locationUtil, times(2)).getLocationByUuid(LOCATION_UUID);
   }
 
 }
