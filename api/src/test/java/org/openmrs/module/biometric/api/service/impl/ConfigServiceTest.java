@@ -3,11 +3,10 @@
  * the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
  * http://openmrs.org/license.
- * <p>
- * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ *
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
  * trademark of OpenMRS Inc.
  */
-
 package org.openmrs.module.biometric.api.service.impl;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -64,50 +63,39 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-/**
- * Tests on the methods found in ConfigService
- */
+/** Tests on the methods found in ConfigService */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(value = {Context.class})
 public class ConfigServiceTest {
 
   private static final String INVALID_ADDRESS_FIELD_ERROR = "Addres hierarchy not found";
   private static final String APP_CONFIG_GP_PREFIX = "biometric.api.config";
-  private static final String BIOMETRIC_CONFIGURATION_NOT_FOUND = "Could not found biometric configuration";
+  private static final String BIOMETRIC_CONFIGURATION_NOT_FOUND =
+      "Could not found biometric configuration";
   private static final String DOT = ".";
   private static final String ERROR_KEY = "error_key";
   private static final String BIOMETRIC_EXTRACTOR_LICENSE = "biometric.extractor.license";
   private static final String SYNC_COMPLETED_DATE = "SYNC_COMPLETED_DATE";
 
-  @Mock
-  private AddressHierarchyService addressHierarchyService;
+  @Mock private AddressHierarchyService addressHierarchyService;
 
-  @Mock
-  private AdministrationService administrationService;
+  @Mock private AdministrationService administrationService;
 
-  @Mock
-  private PatientService patientService;
+  @Mock private PatientService patientService;
 
-  @Mock
-  private LocationService locationService;
+  @Mock private LocationService locationService;
 
-  @Mock
-  private VisitService visitService;
+  @Mock private VisitService visitService;
 
-  @Mock
-  private MessageSourceService messageSourceService;
+  @Mock private MessageSourceService messageSourceService;
 
-  @Mock
-  private DeviceService deviceService;
+  @Mock private DeviceService deviceService;
 
-  @Mock
-  private LicenseService licenseService;
+  @Mock private LicenseService licenseService;
 
-  @Mock
-  private LicenseTypeService licenseTypeService;
+  @Mock private LicenseTypeService licenseTypeService;
 
-  @InjectMocks
-  private ConfigServiceImpl configService;
+  @InjectMocks private ConfigServiceImpl configService;
 
   private String name;
 
@@ -121,13 +109,13 @@ public class ConfigServiceTest {
   @Test
   public void retrieveConfig_shouldRetrieveBiometricConfiguration1IfValidNameIsPassed()
       throws EntityNotFoundException {
-    //Given
+    // Given
     name = "config1";
     given(administrationService.getGlobalProperty(APP_CONFIG_GP_PREFIX + DOT + name))
         .willReturn(TestUtil.getConfiguratoins1());
-    //When
+    // When
     String configuration = configService.retrieveConfig(name);
-    //Then
+    // Then
     Assert.assertTrue(configuration.contains("Kannada"));
 
     verifyConfigInteractions();
@@ -136,13 +124,13 @@ public class ConfigServiceTest {
   @Test
   public void retrieveConfig_shouldRetrieveBiometricConfiguration2IfValidNameIsPassed()
       throws EntityNotFoundException {
-    //Given
+    // Given
     name = "config2";
     given(administrationService.getGlobalProperty(APP_CONFIG_GP_PREFIX + DOT + name))
         .willReturn(TestUtil.getConfiguratoins2());
-    //When
+    // When
     String configuration = configService.retrieveConfig(name);
-    //Then
+    // Then
     Assert.assertTrue(configuration.contains("Covid 1D vaccine"));
 
     verifyConfigInteractions();
@@ -150,16 +138,16 @@ public class ConfigServiceTest {
 
   @Test
   public void retrieveConfig_shouldThrowAPIExceptionIfInvalidNameIsPassed() {
-    //Given
+    // Given
     name = "invalid";
     given(administrationService.getGlobalProperty(APP_CONFIG_GP_PREFIX + DOT + name))
         .willReturn("");
     try {
-      //When
+      // When
       String configuration = configService.retrieveConfig(name);
       Assert.fail("should throw APIException");
     } catch (EntityNotFoundException e) {
-      //Then
+      // Then
       verifyConfigInteractions();
     }
   }
@@ -207,7 +195,6 @@ public class ConfigServiceTest {
       verify(deviceService, times(1)).getDeviceAttributeType(SYNC_COMPLETED_DATE);
       verify(deviceService, times(1)).getDeviceByMAC(device.getDeviceMac(), false);
       verify(deviceService, times(1)).getDeviceAttributeByDeviceAndTypeUuid(device, type.getUuid());
-
     }
   }
 
@@ -236,7 +223,6 @@ public class ConfigServiceTest {
       verify(deviceService, never()).saveDevice(device);
       verify(deviceService, never()).getDeviceByMAC(device.getDeviceMac());
       verify(deviceService, never()).getDeviceAttributeByDeviceAndTypeUuid(device, type.getUuid());
-
     }
   }
 
@@ -263,7 +249,6 @@ public class ConfigServiceTest {
       verify(deviceService, times(1)).getDeviceByMAC(deviceId, false);
       verify(deviceService, times(1)).getDeviceAttributeType(SYNC_COMPLETED_DATE);
       verify(deviceService, times(1)).getDeviceByMAC(anyString(), anyBoolean());
-
     }
   }
 
@@ -302,7 +287,6 @@ public class ConfigServiceTest {
       verify(deviceService, times(0)).getDeviceAttributeType(licenseTypes.iterator().next());
       verify(deviceService, never()).saveDevice(any(Device.class));
       verify(deviceService, never()).getDeviceAttributeByDeviceAndTypeUuid(device, type.getUuid());
-
     }
   }
 
@@ -380,8 +364,8 @@ public class ConfigServiceTest {
     Device device = TestUtil.createDevice(deviceId);
     when(deviceService.getDeviceByMAC(deviceId, false)).thenReturn(null);
     when(deviceService.getDeviceAttributeType(licenseTypes.iterator().next())).thenReturn(type);
-    when(licenseService
-        .getAnyFreeLicense(licenseTypeService.getLicenseType(licenseTypes.iterator().next())))
+    when(licenseService.getAnyFreeLicense(
+            licenseTypeService.getLicenseType(licenseTypes.iterator().next())))
         .thenReturn(null);
     when(deviceService.saveDevice(device)).thenReturn(device);
     try {
@@ -407,8 +391,8 @@ public class ConfigServiceTest {
     License license = TestUtil.createLicense();
     when(deviceService.getDeviceByMAC(deviceId, false)).thenReturn(null);
     when(deviceService.getDeviceAttributeType(licenseTypes.iterator().next())).thenReturn(type);
-    when(licenseService
-        .getAnyFreeLicense(licenseTypeService.getLicenseType(licenseTypes.iterator().next())))
+    when(licenseService.getAnyFreeLicense(
+            licenseTypeService.getLicenseType(licenseTypes.iterator().next())))
         .thenReturn(license);
     when(deviceService.saveDevice(any(Device.class))).thenReturn(device);
     try {
@@ -441,10 +425,9 @@ public class ConfigServiceTest {
       verify(deviceService, times(1)).getDeviceByMAC(deviceId, false);
       verify(deviceService, times(1)).getDeviceAttributeType(licenseTypes.iterator().next());
       verify(deviceService, times(1)).getDeviceAttributeByDeviceAndTypeUuid(device, type.getUuid());
-      //verify(licenseTypeService, times(1)).getLicenseType(licenseTypes.iterator().next());
+      // verify(licenseTypeService, times(1)).getLicenseType(licenseTypes.iterator().next());
       verify(licenseService, times(1))
           .getAnyFreeLicense(licenseTypeService.getLicenseType(licenseTypes.iterator().next()));
-
     }
   }
 
@@ -463,8 +446,8 @@ public class ConfigServiceTest {
         .thenReturn(deviceAttribute);
     when(licenseService.getLicenseByUuid(anyString())).thenReturn(license);
     when(deviceService.getDeviceAttributeType(licenseTypes.iterator().next())).thenReturn(type);
-    when(licenseService
-        .getAnyFreeLicense(licenseTypeService.getLicenseType(licenseTypes.iterator().next())))
+    when(licenseService.getAnyFreeLicense(
+            licenseTypeService.getLicenseType(licenseTypes.iterator().next())))
         .thenReturn(license);
     try {
       configService.retrieveLicense(deviceId, licenseTypes);
@@ -496,16 +479,16 @@ public class ConfigServiceTest {
     }
   }
 
-   /* @Test
-    public void retrieveLicense_shouldRetrieveLicense() {
-        //Given
-        given(administrationService.getGlobalProperty(BIOMETRIC_EXTRACTOR_LICENSE)).willReturn(TestUtil.getLicense());
-        //When
-        String license = configService.retrieveLicense("", Collections.emptyList());
-        //Then
-        Assert.assertTrue(license.contains("IRIS"));
-        verify(administrationService, times(1)).getGlobalProperty(BIOMETRIC_EXTRACTOR_LICENSE);
-    }*/
+  /* @Test
+  public void retrieveLicense_shouldRetrieveLicense() {
+      //Given
+      given(administrationService.getGlobalProperty(BIOMETRIC_EXTRACTOR_LICENSE)).willReturn(TestUtil.getLicense());
+      //When
+      String license = configService.retrieveLicense("", Collections.emptyList());
+      //Then
+      Assert.assertTrue(license.contains("IRIS"));
+      verify(administrationService, times(1)).getGlobalProperty(BIOMETRIC_EXTRACTOR_LICENSE);
+  }*/
 
   @Test
   public void retrieveLocations_shouldReturnAllLocations() {
@@ -564,13 +547,23 @@ public class ConfigServiceTest {
       throws BiometricApiException, IOException {
     String configGp = "12345";
     given(
-        Context.getAdministrationService().getGlobalProperty(BiometricApiConstants.MAIN_CONFIG_GP))
+            Context.getAdministrationService()
+                .getGlobalProperty(BiometricApiConstants.MAIN_CONFIG_GP))
         .willReturn("12345");
     given(
-        Context.getAdministrationService().getGlobalProperty(BiometricApiConstants.LOCALIZATION_GP))
+            Context.getAdministrationService()
+                .getGlobalProperty(BiometricApiConstants.LOCALIZATION_GP))
         .willReturn("123");
     given(Context.getAdministrationService().getGlobalProperty(BiometricApiConstants.CFL_VACCINES))
         .willReturn("6789");
+    given(
+            Context.getAdministrationService()
+                .getGlobalProperty(BiometricApiConstants.SUBSTANCES_CONFIG_GP))
+        .willReturn("[{}]");
+    given(
+            Context.getAdministrationService()
+                .getGlobalProperty(BiometricApiConstants.SUBSTANCE_GROUPS_GP))
+        .willReturn("[{}]");
     given(Context.getLocationService()).willReturn(locationService);
     Location location = TestUtil.createLocation();
     when(locationService.getAllLocations(anyBoolean())).thenReturn(Arrays.asList(location));
@@ -582,7 +575,7 @@ public class ConfigServiceTest {
         .thenReturn(Collections.singletonList("MyCity"));
     List<SyncConfigResponse> responseList = configService.retrieveAllConfigUpdates();
 
-    assertThat(responseList, hasSize(5));
+    assertThat(responseList, hasSize(7));
     verify(locationService, times(1)).getAllLocations(anyBoolean());
     verify(addressHierarchyService, times(1)).getAddressHierarchyEntriesAtTopLevel();
     verify(addressHierarchyService, times(7))
@@ -594,10 +587,12 @@ public class ConfigServiceTest {
       throws BiometricApiException, IOException {
     String configGp = "12345";
     given(
-        Context.getAdministrationService().getGlobalProperty(BiometricApiConstants.MAIN_CONFIG_GP))
+            Context.getAdministrationService()
+                .getGlobalProperty(BiometricApiConstants.MAIN_CONFIG_GP))
         .willReturn("12345");
     given(
-        Context.getAdministrationService().getGlobalProperty(BiometricApiConstants.LOCALIZATION_GP))
+            Context.getAdministrationService()
+                .getGlobalProperty(BiometricApiConstants.LOCALIZATION_GP))
         .willReturn("123");
     given(Context.getLocationService()).willReturn(locationService);
     Location location = TestUtil.createLocation();
@@ -609,7 +604,6 @@ public class ConfigServiceTest {
     when(addressHierarchyService.getPossibleFullAddresses(any(AddressHierarchyEntry.class)))
         .thenReturn(Collections.singletonList("MyCity"));
     List<SyncConfigResponse> responseList = configService.retrieveAllConfigUpdates();
-
   }
 
   @Test(expected = EntityNotFoundException.class)
@@ -619,7 +613,6 @@ public class ConfigServiceTest {
     given(administrationService.getGlobalProperty("cfl.vaccines")).willReturn("");
     String configuration = configService.retrieveVaccineSchedule();
     Assert.fail("should throw APIException");
-
   }
 
   @Test
@@ -629,7 +622,6 @@ public class ConfigServiceTest {
     given(administrationService.getGlobalProperty("cfl.vaccines")).willReturn("1234");
     String configuration = configService.retrieveVaccineSchedule();
     Assert.assertNotNull(configuration);
-
   }
 
   private void verifyInteractions() {
@@ -641,5 +633,4 @@ public class ConfigServiceTest {
   private void verifyConfigInteractions() {
     verify(administrationService, times(1)).getGlobalProperty(APP_CONFIG_GP_PREFIX + DOT + name);
   }
-
 }
