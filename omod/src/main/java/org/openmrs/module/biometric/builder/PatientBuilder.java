@@ -67,6 +67,7 @@ public class PatientBuilder {
     patient.setDateChanged(new Date());
     patient.setPersonDateChanged(new Date());
     patient.setGender(request.getGender());
+    patient.setBirthdateEstimated(request.getIsBirthDateEstimated());
 
     patient.setBirthdate(util.convertIsoStringToDate(request.getBirthdate()));
 
