@@ -4,10 +4,9 @@
  * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
  * http://openmrs.org/license.
  *
- * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is
- * a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
-
 package org.openmrs.module.biometric.web.controller;
 
 import io.swagger.annotations.Api;
@@ -20,8 +19,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.type.TypeReference;
 import org.openmrs.Location;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.biometric.api.contract.BiometricMatchingResult;
+import org.openmrs.module.biometric.api.contract.IdentifierResponse;
 import org.openmrs.module.biometric.api.contract.PatientResponse;
 import org.openmrs.module.biometric.api.contract.SyncImageResponse;
 import org.openmrs.module.biometric.api.contract.SyncTemplateResponse;
@@ -70,12 +72,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.openmrs.module.biometric.api.constants.BiometricApiConstants.PERSON_TEMPLATE_ATTRIBUTE;
 
-/**
- * Consists of APIs to register and match participants.
- */
+/** Consists of APIs to register and match participants. */
 @Api(
     value = "Participant",
     tags = {"REST API for manage Participant information(add,retrieve and delete)"})
@@ -99,20 +100,15 @@ public class ParticipantController extends BaseRestController {
       "Participant already exists with the same uuid";
   private static final String PARTICIPANT_ID_ALREADY_EXISTS = "Participant id already in use";
 
-  @Autowired
-  private PatientBuilder patientBuilder;
+  @Autowired private PatientBuilder patientBuilder;
 
-  @Autowired
-  private ParticipantService participantService;
+  @Autowired private ParticipantService participantService;
 
-  @Autowired
-  private ParticipantMatchResponseBuilder builder;
+  @Autowired private ParticipantMatchResponseBuilder builder;
 
-  @Autowired
-  private BiometricModUtil util;
+  @Autowired private BiometricModUtil util;
 
-  @Autowired
-  private LocationUtil locationUtil;
+  @Autowired private LocationUtil locationUtil;
 
   @Autowired
   @Qualifier("biometric.biometricService")
@@ -125,9 +121,9 @@ public class ParticipantController extends BaseRestController {
    * @param biographicData biographic information of a participant in json
    * @return participant uuid and status of iris registration in biometric server
    * @throws BiometricApiException if there are any issues in fetching the participant's address
-   * details
+   *     details
    * @throws IOException if there are any issues in parsing main configuration defined in a global
-   * property. Config json is parsed to retrieve person address fieldsl
+   *     property. Config json is parsed to retrieve person address fieldsl
    */
   @ApiOperation(
       value = "Register a new participant",
@@ -135,30 +131,34 @@ public class ParticipantController extends BaseRestController {
       response = Map.class)
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful creation of the Participant"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to create a Participant")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful creation of the Participant"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to create a Participant")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(value = "/register", consumes = {
-      MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {
-      MediaType.APPLICATION_JSON_VALUE}, method = RequestMethod.POST)
-  public Map<String, Object> register(@RequestHeader(value = DEVICE_ID) String deviceId,
-      @ApiParam(hidden = true)
-      @RequestParam(value = TEMPLATE, required = false) MultipartFile template,
+  @RequestMapping(
+      value = "/register",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
+      produces = {MediaType.APPLICATION_JSON_VALUE},
+      method = RequestMethod.POST)
+  public Map<String, Object> register(
+      @RequestHeader(value = DEVICE_ID) String deviceId,
+      @ApiParam(hidden = true) @RequestParam(value = TEMPLATE, required = false)
+          MultipartFile template,
       @ApiParam(name = "biographicData", value = "data of a participant", required = true)
-      @RequestParam(BIOGRAPHIC_DATA) String biographicData)
+          @RequestParam(BIOGRAPHIC_DATA)
+          String biographicData)
       throws IOException, BiometricApiException, ParseException {
 
     RegisterRequest request = util.jsonToObject(biographicData, RegisterRequest.class);
     Patient patient = patientBuilder.createFrom(request);
 
     validateParticipantIdAndUuid(patient);
-    //Register participant in OpenMRS
+    // Register participant in OpenMRS
     Patient registeredPatient = participantService.registerParticipant(patient);
 
     if (null == registeredPatient) {
@@ -168,9 +168,8 @@ public class ParticipantController extends BaseRestController {
     String base64EncodedImage = request.getImage();
     if (null != base64EncodedImage) {
       LOGGER.debug("Participant registered in OpenMRS with UUID : {}", registeredPatient.getUuid());
-      participantService
-          .saveParticipantImage(patient.getPerson(), base64EncodedImage,
-              SanitizeUtil.sanitizeInputString(deviceId));
+      participantService.saveParticipantImage(
+          patient.getPerson(), base64EncodedImage, SanitizeUtil.sanitizeInputString(deviceId));
     }
 
     boolean isIrisRegistered = false;
@@ -179,24 +178,28 @@ public class ParticipantController extends BaseRestController {
 
       try {
         Date registrationDate = util.convertIsoStringToDate(request.getRegistrationDate());
-        isIrisRegistered = biometricService
-            .registerBiometricData(util.removeWhiteSpaces(request.getParticipantId()),
+        isIrisRegistered =
+            biometricService.registerBiometricData(
+                util.removeWhiteSpaces(request.getParticipantId()),
                 template.getBytes(),
-                deviceId, locationUuid, registrationDate, patient.getUuid());
+                deviceId,
+                locationUuid,
+                registrationDate,
+                patient.getUuid());
       } catch (Exception ex) {
-        // participant registration should not be failed if there is an issue with the biometric server
+        // participant registration should not be failed if there is an issue with the biometric
+        // server
         LOGGER.error("Issue with Biometric Server", ex);
       }
     }
 
     if (isIrisRegistered) {
-      util.setPersonAttributeValue(registeredPatient.getUuid(), PERSON_TEMPLATE_ATTRIBUTE,
-          deviceId);
+      util.setPersonAttributeValue(
+          registeredPatient.getUuid(), PERSON_TEMPLATE_ATTRIBUTE, deviceId);
     }
 
     Map<String, Object> responseMap = new HashMap<>();
-    responseMap
-        .put(PERSON_UUID, SanitizeUtil.sanitizeOutput(registeredPatient.getUuid()));
+    responseMap.put(PERSON_UUID, SanitizeUtil.sanitizeOutput(registeredPatient.getUuid()));
     responseMap.put(IRIS_STATUS_PARAM_NAME, isIrisRegistered);
 
     return responseMap;
@@ -213,66 +216,68 @@ public class ParticipantController extends BaseRestController {
    */
   @ApiOperation(
       value = "Store participant biometric template",
-      notes = "Store participant biometric template"
-  )
+      notes = "Store participant biometric template")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful enrollment of participant biometric template"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to store participant template")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful enrollment of participant biometric template"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to store participant template")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(value = "/persontemplate/{personUuid}", consumes = {
-      MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {
-      MediaType.APPLICATION_JSON_VALUE}, method = RequestMethod.POST)
-  public final void registerTemplate(@RequestHeader(value = DEVICE_ID) String deviceId,
+  @RequestMapping(
+      value = "/persontemplate/{personUuid}",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
+      produces = {MediaType.APPLICATION_JSON_VALUE},
+      method = RequestMethod.POST)
+  public final void registerTemplate(
+      @RequestHeader(value = DEVICE_ID) String deviceId,
       @ApiParam(name = "personUuid", value = "person uuid", required = true)
-      @PathVariable("personUuid")
+          @PathVariable("personUuid")
           String personUuid,
-      @ApiParam(hidden = true)
-      @RequestParam(value = TEMPLATE) MultipartFile template)
+      @ApiParam(hidden = true) @RequestParam(value = TEMPLATE) MultipartFile template)
       throws BiometricApiException, IOException {
 
-    //check if participant exists
+    // check if participant exists
     Patient patient = participantService.findPatientByUuid(personUuid);
     if (null == patient || null == patient.getPatientIdentifier()) {
       throw new EntityNotFoundException("Participant not found");
     }
 
-    //check if template is already present
+    // check if template is already present
     Set<String> participantSet = new HashSet<>();
     participantSet.add(patient.getPatientIdentifier().getIdentifier());
-    List<BiometricMatchingResult> biometricResults = biometricService
-        .matchBiometricData(template.getBytes(), participantSet);
+    List<BiometricMatchingResult> biometricResults =
+        biometricService.matchBiometricData(template.getBytes(), participantSet);
 
     if (!CollectionUtils.isEmpty(biometricResults)) {
       throw new BiometricApiException("Template already exists for this participant");
     }
 
-    biometricService
-        .registerBiometricData(
-            util.removeWhiteSpaces(patient.getPatientIdentifier().getIdentifier()),
-            template.getBytes(),
-            deviceId, patient.getPatientIdentifier().getLocation().getUuid(),
-            new Date(patient.getDateCreated().getTime()), patient.getUuid());
+    biometricService.registerBiometricData(
+        util.removeWhiteSpaces(patient.getPatientIdentifier().getIdentifier()),
+        template.getBytes(),
+        deviceId,
+        patient.getPatientIdentifier().getLocation().getUuid(),
+        new Date(patient.getDateCreated().getTime()),
+        patient.getUuid());
   }
 
   /**
    * Match a participant using an identifier or phone or biometric template or combination of them.
    *
-   * <p>when a combination of phone and identifier is used then find all the participants with
-   * phone and find all participants with identifier and combine the results.
+   * <p>when a combination of phone and identifier is used then find all the participants with phone
+   * and find all participants with identifier and combine the results.
    *
    * <p>when a combination of biographic and biometric data is used for matching then find all the
    * participants with phone and find all participants with identifier and combine the results and
    * return the results if the biometric template matches.
    *
-   * <p>If Multi factor search is enabled then the biometric template matching will be done only
-   * for the participants matched with biographic criteria.
+   * <p>If Multi factor search is enabled then the biometric template matching will be done only for
+   * the participants matched with biographic criteria.
    *
    * <p>If Multi factor search is not enabled then the biometric results and biographic results are
    * combined.
@@ -282,7 +287,7 @@ public class ParticipantController extends BaseRestController {
    * @param phone participant's phone
    * @param country participant's country
    * @return list of matched participants details by biometric template/phone/identifier ot
-   * combination of these
+   *     combination of these
    */
   @ApiOperation(
       value = "Retrieves list of matched participants",
@@ -291,34 +296,35 @@ public class ParticipantController extends BaseRestController {
       responseContainer = "List")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful match of the Participant"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_BAD_REQUEST,
-              message = "Invalid or incomplete request passed"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to match a Participant")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful match of the Participant"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_BAD_REQUEST,
+            message = "Invalid or incomplete request passed"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to match a Participant")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(value = "/match", consumes = {
-      MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/match",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
+      method = RequestMethod.POST)
   public List<ParticipantMatchResponse> match(
       @ApiParam(name = "template", value = "Iris template", required = false)
-      @RequestParam(value = TEMPLATE, required = false)
+          @RequestParam(value = TEMPLATE, required = false)
           MultipartFile template,
       @ApiParam(name = "phone", value = "Phone number of a participant", required = false)
-      @RequestParam(value = "phone", required = false)
+          @RequestParam(value = "phone", required = false)
           String phone,
       @ApiParam(name = "participantId", value = "Participant unique id", required = false)
-      @RequestParam(value = "participantId", required = false)
+          @RequestParam(value = "participantId", required = false)
           String participantId,
       @ApiParam(name = "country", value = "Country, participant belongs to", required = false)
-      @RequestParam(value = "country", required = false)
+          @RequestParam(value = "country", required = false)
           String country)
-          
       throws IOException, BiometricApiException {
 
     if (null == template && StringUtils.isEmpty(participantId) && StringUtils.isEmpty(phone)) {
@@ -326,12 +332,14 @@ public class ParticipantController extends BaseRestController {
           "template/ParticipantId/Phone is required for match a participant");
     }
 
-    boolean isMFAEnabled = Boolean
-        .parseBoolean(
+    boolean isMFAEnabled =
+        Boolean.parseBoolean(
             Context.getAdministrationService().getGlobalProperty(GP_BIOMETRIC_ENABLE_MFA));
 
-    List<PatientResponse> patients = findBiographicData(
-        SanitizeUtil.sanitizeInputString(participantId), SanitizeUtil.sanitizeInputString(phone));
+    List<PatientResponse> patients =
+        findBiographicData(
+            SanitizeUtil.sanitizeInputString(participantId),
+            SanitizeUtil.sanitizeInputString(phone));
     List<PatientResponse> patientsWithCountry = findPatientsWithCountry(country, patients);
 
     Set<String> participantSet = new HashSet<>(10);
@@ -353,7 +361,6 @@ public class ParticipantController extends BaseRestController {
     return responseList;
   }
 
-
   /**
    * Void a participant (soft delete).
    *
@@ -364,25 +371,25 @@ public class ParticipantController extends BaseRestController {
   @ApiOperation(value = "Soft delete a participant", notes = "Soft delete a participant")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful deletion of the Participant"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to delete Participant"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_NOT_FOUND,
-              message = "Given participant not found")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful deletion of the Participant"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to delete Participant"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_NOT_FOUND,
+            message = "Given participant not found")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   @RequestMapping(value = "/participant/{personUuid}", method = RequestMethod.PUT)
   public void voidParticipant(
       @ApiParam(name = "personUuid", value = "person uuid", required = true)
-      @PathVariable("personUuid")
+          @PathVariable("personUuid")
           String personUuid,
       @ApiParam(name = "reason", value = "reason for deleting", required = true)
-      @RequestParam("reason")
+          @RequestParam("reason")
           String reason)
       throws BiometricApiException, IOException {
 
@@ -392,7 +399,6 @@ public class ParticipantController extends BaseRestController {
     }
     participantService.voidPatient(patient, reason);
   }
-
 
   /**
    * Retrieves the participants by participant uuids.
@@ -410,33 +416,34 @@ public class ParticipantController extends BaseRestController {
       responseContainer = "List")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful of the Participants with Uuids"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to participants"),
-          @ApiResponse(code = HttpURLConnection.HTTP_BAD_REQUEST, message = "Error in request uuids")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful of the Participants with Uuids"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to participants"),
+        @ApiResponse(code = HttpURLConnection.HTTP_BAD_REQUEST, message = "Error in request uuids")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(value = "/getParticipantsByUuids", consumes = {
-      MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/getParticipantsByUuids",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
+      method = RequestMethod.POST)
   public List<PatientResponse> getParticipantsByUuids(
       @RequestHeader(value = DEVICE_ID) String deviceId,
-      @ApiParam(name = "body", value = "Participant uuids", required = true)
-      @RequestBody String body)
+      @ApiParam(name = "body", value = "Participant uuids", required = true) @RequestBody
+          String body)
       throws IOException, BiometricApiException {
 
     LOGGER.debug("getParticipantsByUuids request triggered at : {}", new Date());
 
     Map<String, Set<String>> map =
-        util.jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {
-        });
+        util.jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {});
 
     util.validateUuids(map.get(PARTICIPANT_UUIDS));
-    return participantService
-        .findPatientsByUuids(SanitizeUtil.sanitizeStringList(map.get(PARTICIPANT_UUIDS)));
+    return participantService.findPatientsByUuids(
+        SanitizeUtil.sanitizeStringList(map.get(PARTICIPANT_UUIDS)));
   }
 
   /**
@@ -445,7 +452,7 @@ public class ParticipantController extends BaseRestController {
    * @param deviceId the id of the device from which the request was received
    * @param body request body which contains list of person uuids
    * @return list of matched participants details by biometric template/phone/identifier ot
-   * combination of these
+   *     combination of these
    * @throws IOException in case of any issues with input data
    * @throws EntityValidationException in case of any issues with the input data
    */
@@ -456,32 +463,33 @@ public class ParticipantController extends BaseRestController {
       responseContainer = "List")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful return of the biometric templates"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to return templates"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_BAD_REQUEST,
-              message = "Error in the request uuids")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful return of the biometric templates"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to return templates"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_BAD_REQUEST,
+            message = "Error in the request uuids")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(value = "/getBiometricTemplatesByUuids", consumes = {
-      MediaType.APPLICATION_JSON_VALUE}, produces = {
-      MediaType.APPLICATION_JSON_VALUE}, method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/getBiometricTemplatesByUuids",
+      consumes = {MediaType.APPLICATION_JSON_VALUE},
+      produces = {MediaType.APPLICATION_JSON_VALUE},
+      method = RequestMethod.POST)
   public List<SyncTemplateResponse> getBiometricTemplatesByUuids(
       @RequestHeader(value = DEVICE_ID) String deviceId,
-      @ApiParam(name = "body", value = "template uuids", required = true)
-      @Valid @RequestBody String body)
+      @ApiParam(name = "body", value = "template uuids", required = true) @Valid @RequestBody
+          String body)
       throws IOException, EntityValidationException {
 
     LOGGER.debug("getBiometricTemplatesByUuids request triggered at : {}", new Date());
 
     Map<String, Set<String>> map =
-        util.jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {
-        });
+        util.jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {});
     util.validateUuids(map.get(PARTICIPANT_UUIDS));
     return participantService.getBiometricDataByParticipantIds(
         SanitizeUtil.sanitizeStringList(map.get(PARTICIPANT_UUIDS)));
@@ -537,11 +545,10 @@ public class ParticipantController extends BaseRestController {
    * @param deviceId the id of the device from which the request was received
    * @param body request body which contains list of person uuids
    * @return list of matched participants details by biometric template/phone/identifier ot
-   * combination of these
+   *     combination of these
    * @throws IOException in case of any issues with the file operations
    * @throws EntityValidationException in case of any issues with the input data
    */
-
   @ApiOperation(
       value = "Retrieves images by uuids",
       notes = "Retrieves images by uuids",
@@ -549,35 +556,61 @@ public class ParticipantController extends BaseRestController {
       responseContainer = "List")
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful return of the images with uuids"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to return images"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_BAD_REQUEST,
-              message = "Error in the request uuids")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful return of the images with uuids"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to return images"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_BAD_REQUEST,
+            message = "Error in the request uuids")
       })
-
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(value = "/getImagesByUuids", consumes = {
-      MediaType.MULTIPART_FORM_DATA_VALUE}, method = RequestMethod.POST)
+  @RequestMapping(
+      value = "/getImagesByUuids",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
+      method = RequestMethod.POST)
   public List<SyncImageResponse> getImagesByUuids(
       @ApiParam(name = "deviceId", value = "Id of the device", required = true)
-      @RequestHeader(value = DEVICE_ID) String deviceId,
-      @ApiParam(name = "body", value = "Image uuids", required = true)
-      @RequestBody String body)
+          @RequestHeader(value = DEVICE_ID)
+          String deviceId,
+      @ApiParam(name = "body", value = "Image uuids", required = true) @RequestBody String body)
       throws IOException, EntityValidationException {
 
     LOGGER.debug("getImagesByUuids request triggered at : {}", new Date());
-    Map<String, Set<String>> map = util
-        .jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {
-        });
+    Map<String, Set<String>> map =
+        util.jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {});
     util.validateUuids(map.get(PARTICIPANT_UUIDS));
-    return participantService
-        .findImagesByUuids(SanitizeUtil.sanitizeStringList(map.get(PARTICIPANT_UUIDS)));
+    return participantService.findImagesByUuids(
+        SanitizeUtil.sanitizeStringList(map.get(PARTICIPANT_UUIDS)));
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  @RequestMapping(value = "/identifiers/{name}", method = RequestMethod.GET)
+  public List<IdentifierResponse> getAllIdentifiersByType(
+      @PathVariable("name") String identifierTypeName) throws EntityNotFoundException {
+    PatientIdentifierType patientIdentifierType =
+        Context.getPatientService().getPatientIdentifierTypeByName(identifierTypeName);
+    if (patientIdentifierType == null) {
+      throw new EntityNotFoundException(
+          String.format(
+              "Patient identifier type with name: %s does not exist", identifierTypeName));
+    }
+
+    List<PatientIdentifier> patientIdentifiers =
+        participantService.getAllIdentifiersByType(identifierTypeName);
+
+    return patientIdentifiers.stream()
+        .map(
+            patientIdentifier ->
+                new IdentifierResponse(
+                    patientIdentifier.getPatient().getUuid(),
+                    identifierTypeName,
+                    patientIdentifier.getIdentifier()))
+        .collect(Collectors.toList());
   }
 
   private List<PatientResponse> findByParticipantId(String participantId)

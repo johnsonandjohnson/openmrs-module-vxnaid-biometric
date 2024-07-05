@@ -4,10 +4,9 @@
  * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
  * http://openmrs.org/license.
  *
- * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is
- * a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
-
 package org.openmrs.module.biometric.api.service;
 
 import java.io.IOException;
@@ -15,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.Person;
 import org.openmrs.module.biometric.api.contract.PatientResponse;
 import org.openmrs.module.biometric.api.contract.SyncImageResponse;
@@ -22,9 +22,7 @@ import org.openmrs.module.biometric.api.contract.SyncTemplateResponse;
 import org.openmrs.module.biometric.api.exception.BiometricApiException;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Defines the services to register and match participants.
- */
+/** Defines the services to register and match participants. */
 public interface ParticipantService {
 
   /**
@@ -34,8 +32,7 @@ public interface ParticipantService {
    * @return participant's uuid
    * @throws BiometricApiException if participant already exists with the identifier
    */
-  Patient registerParticipant(Patient patient)
-      throws BiometricApiException;
+  Patient registerParticipant(Patient patient) throws BiometricApiException;
 
   /**
    * Update a patient.
@@ -80,7 +77,8 @@ public interface ParticipantService {
    * @throws IOException when there is an issue in reading the images from the file path
    * @throws BiometricApiException when failed to upload a participant's image
    */
-  Optional<String> retrieveParticipantImage(String personUuid) throws IOException, BiometricApiException;
+  Optional<String> retrieveParticipantImage(String personUuid)
+      throws IOException, BiometricApiException;
 
   /**
    * Retrieve a patient by his phone.
@@ -88,9 +86,9 @@ public interface ParticipantService {
    * @param phone phone number of a participant.
    * @return participants matched by phone
    * @throws BiometricApiException if there are any issues in fetching the participant's address
-   * details
+   *     details
    * @throws IOException if there are any issues in parsing main configuration defined in a global
-   * property. Config json is parsed to retrieve person address fields
+   *     property. Config json is parsed to retrieve person address fields
    */
   List<PatientResponse> findByPhone(String phone) throws BiometricApiException, IOException;
 
@@ -100,9 +98,9 @@ public interface ParticipantService {
    * @param patientIdentifier unique identifier for a participant.
    * @return participants matched by unique identifier
    * @throws BiometricApiException if there are any issues in fetching the participant's address
-   * details
+   *     details
    * @throws IOException if there are any issues in parsing main configuration defined in a global
-   * property. Config json is parsed to retrieve person address fields.
+   *     property. Config json is parsed to retrieve person address fields.
    */
   List<PatientResponse> findByParticipantId(String patientIdentifier)
       throws IOException, BiometricApiException;
@@ -143,4 +141,11 @@ public interface ParticipantService {
    */
   List<SyncTemplateResponse> getBiometricDataByParticipantIds(Set<String> uuids);
 
+  /**
+   * Retrieves all patient's identifiers of given type
+   *
+   * @param identifierType identifier type name
+   * @return list of patient identifiers
+   */
+  List<PatientIdentifier> getAllIdentifiersByType(String identifierType);
 }
