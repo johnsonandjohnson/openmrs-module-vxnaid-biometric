@@ -144,8 +144,8 @@ public interface ParticipantService {
   /**
    * Retrieves all patient's identifiers of given type
    *
-   * @param identifierName identifier type name
+   * @param identifierType identifier type name
    * @return list of patient identifiers
    */
-  List<PatientIdentifier> getAllIdentifiersByName(String identifierName);
+  List<PatientIdentifier> getAllIdentifiersByType(String identifierType);
 }

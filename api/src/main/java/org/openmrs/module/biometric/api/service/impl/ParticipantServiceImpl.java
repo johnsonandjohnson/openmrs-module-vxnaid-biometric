@@ -273,9 +273,9 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
   }
 
   @Override
-  public List<PatientIdentifier> getAllIdentifiersByName(String identifierName) {
+  public List<PatientIdentifier> getAllIdentifiersByType(String identifierType) {
     return patientService.getAllPatients(false).stream()
-        .map(patient -> patient.getPatientIdentifier(identifierName))
+        .map(patient -> patient.getPatientIdentifier(identifierType))
         .collect(Collectors.toList());
   }
 

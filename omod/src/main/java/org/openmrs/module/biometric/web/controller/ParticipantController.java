@@ -601,7 +601,7 @@ public class ParticipantController extends BaseRestController {
     }
 
     List<PatientIdentifier> patientIdentifiers =
-        participantService.getAllIdentifiersByName(identifierTypeName);
+        participantService.getAllIdentifiersByType(identifierTypeName);
 
     return patientIdentifiers.stream()
         .map(
