@@ -39,6 +39,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
@@ -269,6 +270,13 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
       responseList.add(response);
     }
     return responseList;
+  }
+
+  @Override
+  public List<PatientIdentifier> getAllIdentifiersByName(String identifierName) {
+    return patientService.getAllPatients(false).stream()
+        .map(patient -> patient.getPatientIdentifier(identifierName))
+        .collect(Collectors.toList());
   }
 
   private DbSession getSession() {
