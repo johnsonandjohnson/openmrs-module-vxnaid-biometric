@@ -65,6 +65,7 @@ public class ConfigServiceImpl implements ConfigService {
   private static final String SITE_CODE_ATTRIBUTE_TYPE = "siteCode";
   private static final String SUBSTANCES_CONFIG_ALIAS = "substancesConfig";
   private static final String SUBSTANCE_GROUPS_ALIAS = "substancesGroupConfig";
+  private static final String OTHER_SUBSTANCES_ALIAS = "otherSubstancesConfig";
 
   private DeviceService deviceService;
 
@@ -189,6 +190,13 @@ public class ConfigServiceImpl implements ConfigService {
     String md5HashSubstanceGroupsConfig = SecurityUtil.getMd5Hash(objectMapper.readTree(substanceGroupsConfigGp).toString());
     substanceGroupsConfigResponse.setHash(md5HashSubstanceGroupsConfig);
     responseList.add(substanceGroupsConfigResponse);
+
+    SyncConfigResponse otherSubstancesConfigResponse = new SyncConfigResponse();
+    String otherSubstancesConfigGp = administrationService.getGlobalProperty(BiometricApiConstants.OTHER_SUBSTANCES_CONFIG_GP);
+    otherSubstancesConfigResponse.setName(OTHER_SUBSTANCES_ALIAS);
+    String md5HashOtherSubstancesConfig = SecurityUtil.getMd5Hash(objectMapper.readTree(otherSubstancesConfigGp).toString());
+    otherSubstancesConfigResponse.setHash(md5HashOtherSubstancesConfig);
+    responseList.add(otherSubstancesConfigResponse);
 
     return responseList;
   }

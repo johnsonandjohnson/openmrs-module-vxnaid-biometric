@@ -43,6 +43,7 @@ public final class BiometricApiConstants {
   public static final String ENABLE_BIOMETRIC = "biometric.enable.biometric.feature";
   public static final String SUBSTANCES_CONFIG_GP = GP_PREFIX + ".substances";
   public static final String SUBSTANCE_GROUPS_GP = GP_PREFIX + ".substanceGroups";
+  public static final String OTHER_SUBSTANCES_CONFIG_GP = GP_PREFIX + ".otherSubstances";
 
   private BiometricApiConstants() {
   }
