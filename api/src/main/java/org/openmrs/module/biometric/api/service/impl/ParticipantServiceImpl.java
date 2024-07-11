@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -276,6 +277,7 @@ public class ParticipantServiceImpl extends BaseOpenmrsService implements Partic
   public List<PatientIdentifier> getAllIdentifiersByType(String identifierType) {
     return patientService.getAllPatients(false).stream()
         .map(patient -> patient.getPatientIdentifier(identifierType))
+        .filter(Objects::nonNull)
         .collect(Collectors.toList());
   }
 
