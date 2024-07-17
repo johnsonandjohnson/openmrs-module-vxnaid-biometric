@@ -95,7 +95,7 @@ public class ParticipantController extends BaseRestController {
   private static final String BIOGRAPHIC_DATA = "biographicData";
   private static final String PARTICIPANT_UUIDS = "participantUuids";
   private static final String CROSS_COUNTRY_PARTICIPANTS = "isCrossCountryImplementation";
-  private static final String PATIENT_ALREADY_EXISTS = "duplicate request";
+  private static final String PATIENT_ALREADY_EXISTS = "patient already exists";
   private static final String PATIENT_ALREADY_EXISTS_WITH_DIFF_ID =
       "Participant already exists with the same uuid";
   private static final String PARTICIPANT_ID_ALREADY_EXISTS = "Participant id already in use";
