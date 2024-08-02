@@ -37,6 +37,8 @@ public class RegisterRequest {
 
   private List<AttributeData> attributes;
 
+  private String updateDate;
+
   /** base64 encoded format of the participant's image */
   private String image;
 
@@ -126,5 +128,13 @@ public class RegisterRequest {
 
   public void setImage(String image) {
     this.image = image;
+  }
+
+  public String getUpdateDate() {
+    return updateDate;
+  }
+
+  public void setUpdateDate(String updateDate) {
+    this.updateDate = updateDate;
   }
 }

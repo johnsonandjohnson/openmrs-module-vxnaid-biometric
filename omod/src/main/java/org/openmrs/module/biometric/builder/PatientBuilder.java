@@ -13,7 +13,6 @@ import static org.openmrs.module.biometric.constants.BiometricModConstants.OPEN_
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +57,7 @@ public class PatientBuilder {
    * @param request Registration request
    * @return Patient @see org.openmrs.Patient
    */
-  public Patient createFrom(RegisterRequest request)
+  public Patient createFromRegisterRequest(RegisterRequest request)
       throws EntityNotFoundException, ParseException {
     Patient patient = new Patient();
     patient.setUuid(request.getParticipantUuid());
@@ -68,32 +67,84 @@ public class PatientBuilder {
     patient.setPersonDateChanged(new Date());
     patient.setGender(request.getGender());
     patient.setBirthdateEstimated(request.getIsBirthDateEstimated());
-
     patient.setBirthdate(util.convertIsoStringToDate(request.getBirthdate()));
 
     String locationUuid = locationUtil.getLocationUuid(request.getAttributes());
     Location location = locationUtil.getLocationByUuid(locationUuid);
 
-    PatientIdentifierType patientIdentifierType =
-        patientService.getPatientIdentifierTypeByName(OPEN_MRS_ID);
-    PatientIdentifier patientIdentifier = new PatientIdentifier();
-    patientIdentifier.setIdentifierType(patientIdentifierType);
-    // remove all white space characters in the participant id
-    String participantId = util.removeWhiteSpaces(request.getParticipantId());
-    patientIdentifier.setIdentifier(participantId);
-    patientIdentifier.setPreferred(Boolean.TRUE);
-    patientIdentifier.setLocation(locationUtil.getLocationByUuid(locationUuid));
-    patient.addIdentifier(patientIdentifier);
+    if (StringUtils.isNotBlank(request.getParticipantId())) {
+      setIdentifier(patient, OPEN_MRS_ID, request.getParticipantId(), location);
+    }
 
     if (StringUtils.isNotBlank(request.getNin())) {
-      setNin(patient, request.getNin(), location);
+      setIdentifier(patient, BiometricApiConstants.NIN_IDENTIFIER_NAME, request.getNin(), location);
     }
 
     // store first sync date of a participant, actual registration date will be stored in
     // dateCreated field
     List<AttributeData> attributes = request.getAttributes();
     attributes.add(util.createAttribute(FIRST_SYNC_DATE, util.dateToISO8601(new Date())));
+    setAttributes(patient, attributes);
+    setAddresses(patient, request.getAddresses());
 
+    PersonName personName = new PersonName();
+    // currently hardcoded,  as the name is currently not captured
+    personName.setGivenName(GIVEN_NAME);
+    patient.addName(personName);
+    return patient;
+  }
+
+  public Patient createFromUpdateRequest(RegisterRequest request)
+      throws EntityNotFoundException, ParseException {
+    Patient patient = patientService.getPatientByUuid(request.getParticipantUuid());
+    Date updateDate = util.convertIsoStringToDate(request.getUpdateDate());
+    patient.setDateChanged(updateDate);
+    patient.setPersonDateCreated(updateDate);
+    patient.setGender(request.getGender());
+    patient.setBirthdateEstimated(request.getIsBirthDateEstimated());
+    patient.setBirthdate(util.convertIsoStringToDate(request.getBirthdate()));
+
+    Location location =
+        locationUtil.getLocationByUuid(locationUtil.getLocationUuid(request.getAttributes()));
+    if (StringUtils.isNotBlank(request.getParticipantId())) {
+      setIdentifier(patient, OPEN_MRS_ID, request.getParticipantId(), location);
+    }
+
+    if (StringUtils.isNotBlank(request.getNin())) {
+      setIdentifier(patient, BiometricApiConstants.NIN_IDENTIFIER_NAME, request.getNin(), location);
+    }
+
+    setAttributes(patient, request.getAttributes());
+    setAddresses(patient, request.getAddresses());
+
+    return patient;
+  }
+
+  private void setIdentifier(
+      Patient patient, String identifierTypeName, String identifierValue, Location location) {
+    PatientIdentifierType patientIdentifierType =
+        patientService.getPatientIdentifierTypeByName(identifierTypeName);
+    if (patientIdentifierType == null) {
+      throw new IllegalStateException(
+          String.format("Missing identifier type name with name: %s", identifierTypeName));
+    }
+
+    PatientIdentifier patientIdentifier = patient.getPatientIdentifier(patientIdentifierType);
+    if (patientIdentifier == null) {
+      patientIdentifier = new PatientIdentifier();
+      patientIdentifier.setIdentifierType(patientIdentifierType);
+      patientIdentifier.setIdentifier(util.removeWhiteSpaces(identifierValue));
+      patientIdentifier.setPreferred(
+          StringUtils.equals(identifierTypeName, OPEN_MRS_ID) ? Boolean.TRUE : Boolean.FALSE);
+      patientIdentifier.setLocation(location);
+      patient.addIdentifier(patientIdentifier);
+    } else {
+      patientIdentifier.setIdentifier(identifierValue);
+    }
+  }
+
+  private void setAttributes(Patient patient, List<AttributeData> attributes)
+      throws EntityNotFoundException {
     for (AttributeData attr : attributes) {
       PersonAttribute attribute = new PersonAttribute();
       attribute.setValue(attr.getValue());
@@ -106,9 +157,15 @@ public class PatientBuilder {
       attribute.setAttributeType(personAttributeType);
       patient.addAttribute(attribute);
     }
+  }
 
-    Set<PersonAddress> personAddresses = new HashSet<>(10);
-    for (Address address : request.getAddresses()) {
+  private void setAddresses(Patient patient, List<Address> addresses) {
+    patient.getAddresses().stream()
+        .filter(personAddress -> !personAddress.getVoided())
+        .forEach(personAddress -> personService.voidPersonAddress(personAddress, "Old address"));
+
+    Set<PersonAddress> personAddresses = patient.getAddresses();
+    for (Address address : addresses) {
       PersonAddress personAddress = new PersonAddress();
       personAddress.setAddress1(address.getAddress1());
       personAddress.setAddress2(address.getAddress2());
@@ -119,29 +176,7 @@ public class PatientBuilder {
       personAddress.setCountry(address.getCountry());
       personAddresses.add(personAddress);
     }
+
     patient.setAddresses(personAddresses);
-    PersonName personName = new PersonName();
-    // currently hardcoded,  as the name is currently not captured
-    personName.setGivenName(GIVEN_NAME);
-    patient.addName(personName);
-    return patient;
-  }
-
-  private void setNin(Patient patient, String nationalIdNumber, Location location) {
-    PatientIdentifierType ninIdentifierType =
-        patientService.getPatientIdentifierTypeByName(BiometricApiConstants.NIN_IDENTIFIER_NAME);
-    if (ninIdentifierType == null) {
-      throw new IllegalStateException(
-          "Missing Uganda National ID identifier, missing "
-              + "PatientIdentifier.name="
-              + BiometricApiConstants.NIN_IDENTIFIER_NAME);
-    }
-
-    PatientIdentifier nin = new PatientIdentifier();
-    nin.setIdentifierType(ninIdentifierType);
-    nin.setIdentifier(util.removeWhiteSpaces(nationalIdNumber));
-    nin.setPreferred(Boolean.FALSE);
-    nin.setLocation(location);
-    patient.addIdentifier(nin);
   }
 }

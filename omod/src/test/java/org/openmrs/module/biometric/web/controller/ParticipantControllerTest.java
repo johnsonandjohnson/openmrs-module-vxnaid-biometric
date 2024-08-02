@@ -170,7 +170,7 @@ public class ParticipantControllerTest {
     Patient patient = TestUtil.createPatient(person);
 
     when(objectMapper.readValue(biographicData, RegisterRequest.class)).thenReturn(request);
-    when(patientBuilder.createFrom(request)).thenReturn(patient);
+    when(patientBuilder.createFromRegisterRequest(request)).thenReturn(patient);
     when(locationUtil.getLocationUuid(request.getAttributes())).thenReturn(LOCATION_UUID);
     when(util.removeWhiteSpaces(PARTICIPANT_ID)).thenReturn(PARTICIPANT_ID);
     when(participantService.registerParticipant(patient))
@@ -512,7 +512,7 @@ public class ParticipantControllerTest {
     Patient patient = TestUtil.createPatient(person);
     PatientResponse patientResponse = TestUtil.createPatientResponse();
     when(objectMapper.readValue(biographicData, RegisterRequest.class)).thenReturn(request);
-    when(patientBuilder.createFrom(request)).thenReturn(patient);
+    when(patientBuilder.createFromRegisterRequest(request)).thenReturn(patient);
     when(locationUtil.getLocationUuid(request.getAttributes())).thenReturn(LOCATION_UUID);
     when(util.removeWhiteSpaces(PARTICIPANT_ID)).thenReturn(PARTICIPANT_ID);
     when(participantService.registerParticipant(patient))
@@ -549,7 +549,7 @@ public class ParticipantControllerTest {
     PatientResponse patientResponse = TestUtil.createPatientResponse();
     patientResponse.setParticipantId("btest1");
     when(objectMapper.readValue(biographicData, RegisterRequest.class)).thenReturn(request);
-    when(patientBuilder.createFrom(request)).thenReturn(patient);
+    when(patientBuilder.createFromRegisterRequest(request)).thenReturn(patient);
     when(locationUtil.getLocationUuid(request.getAttributes())).thenReturn(LOCATION_UUID);
     when(util.removeWhiteSpaces(PARTICIPANT_ID)).thenReturn(PARTICIPANT_ID);
     when(participantService.registerParticipant(patient))
@@ -585,7 +585,7 @@ public class ParticipantControllerTest {
     PatientResponse patientResponse = TestUtil.createPatientResponse();
     patientResponse.setParticipantId("btest1");
     when(objectMapper.readValue(biographicData, RegisterRequest.class)).thenReturn(request);
-    when(patientBuilder.createFrom(request)).thenReturn(patient);
+    when(patientBuilder.createFromRegisterRequest(request)).thenReturn(patient);
     when(locationUtil.getLocationUuid(request.getAttributes())).thenReturn(LOCATION_UUID);
     when(util.removeWhiteSpaces(PARTICIPANT_ID)).thenReturn(PARTICIPANT_ID);
     when(participantService.registerParticipant(patient))
@@ -622,7 +622,7 @@ public class ParticipantControllerTest {
     PatientResponse patientResponse = TestUtil.createPatientResponse();
     patientResponse.setParticipantId("btest1");
     when(objectMapper.readValue(biographicData, RegisterRequest.class)).thenReturn(request);
-    when(patientBuilder.createFrom(request)).thenReturn(patient);
+    when(patientBuilder.createFromRegisterRequest(request)).thenReturn(patient);
     when(locationUtil.getLocationUuid(request.getAttributes())).thenReturn(LOCATION_UUID);
     when(util.removeWhiteSpaces(PARTICIPANT_ID)).thenReturn(PARTICIPANT_ID);
     when(participantService.registerParticipant(patient))

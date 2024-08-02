@@ -87,7 +87,7 @@ public class PatientBuilderTest {
   }
 
   @Test
-  public void createFrom_shouldCreatePatientObject()
+  public void createFrom_shouldCreatePatientObjectRegisterRequest()
       throws EntityNotFoundException, ParseException {
     patientIdentifierType = new PatientIdentifierType();
     patientIdentifierType.setUuid(OpenmrsUtil.generateUid());
@@ -103,7 +103,7 @@ public class PatientBuilderTest {
         .thenReturn(BiometricTestConstants.PARTICIPANT_ID);
     when(personService.getPersonAttributeTypeByName(anyString()))
         .thenReturn(new PersonAttributeType());
-    Patient patient = patientBuilder.createFrom(request);
+    Patient patient = patientBuilder.createFromRegisterRequest(request);
     assertNotNull(patient);
     assertThat(patient.getPatientIdentifier().getIdentifierType().getName(), equalTo(OPEN_MRS_ID));
     assertThat(patient.getPatientIdentifier().getIdentifier(),
@@ -113,7 +113,7 @@ public class PatientBuilderTest {
     verify(patientService, times(1)).getPatientIdentifierTypeByName(anyString());
     verify(personService, times(4)).getPersonAttributeTypeByName(anyString());
     verify(locationUtil, times(1)).getLocationUuid(request.getAttributes());
-    verify(locationUtil, times(2)).getLocationByUuid(LOCATION_UUID);
+    verify(locationUtil, times(1)).getLocationByUuid(LOCATION_UUID);
   }
 
 }

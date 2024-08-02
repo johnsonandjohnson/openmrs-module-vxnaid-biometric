@@ -155,7 +155,7 @@ public class ParticipantController extends BaseRestController {
       throws IOException, BiometricApiException, ParseException {
 
     RegisterRequest request = util.jsonToObject(biographicData, RegisterRequest.class);
-    Patient patient = patientBuilder.createFrom(request);
+    Patient patient = patientBuilder.createFromRegisterRequest(request);
 
     validateParticipantIdAndUuid(patient);
     // Register participant in OpenMRS
@@ -201,6 +201,31 @@ public class ParticipantController extends BaseRestController {
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put(PERSON_UUID, SanitizeUtil.sanitizeOutput(registeredPatient.getUuid()));
     responseMap.put(IRIS_STATUS_PARAM_NAME, isIrisRegistered);
+
+    return responseMap;
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  @RequestMapping(
+      value = "/update",
+      produces = {MediaType.APPLICATION_JSON_VALUE},
+      method = RequestMethod.POST)
+  public Map<String, String> update(
+      @ApiParam(name = "biographicData", value = "data of a participant", required = true)
+          @RequestBody
+          String biographicData)
+      throws IOException, BiometricApiException, ParseException {
+    RegisterRequest request = util.jsonToObject(biographicData, RegisterRequest.class);
+    Patient patient = patientBuilder.createFromUpdateRequest(request);
+    Patient updatedPatient = participantService.updateParticipant(patient);
+
+    if (null == updatedPatient) {
+      throw new BiometricApiException("Participant update failed");
+    }
+
+    Map<String, String> responseMap = new HashMap<>();
+    responseMap.put(PERSON_UUID, SanitizeUtil.sanitizeOutput(updatedPatient.getUuid()));
 
     return responseMap;
   }

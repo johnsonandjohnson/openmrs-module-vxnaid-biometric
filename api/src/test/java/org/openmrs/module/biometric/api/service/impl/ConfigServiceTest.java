@@ -564,6 +564,10 @@ public class ConfigServiceTest {
             Context.getAdministrationService()
                 .getGlobalProperty(BiometricApiConstants.SUBSTANCE_GROUPS_GP))
         .willReturn("[{}]");
+    given(
+        Context.getAdministrationService()
+            .getGlobalProperty(BiometricApiConstants.OTHER_SUBSTANCES_CONFIG_GP))
+        .willReturn("[{}]");
     given(Context.getLocationService()).willReturn(locationService);
     Location location = TestUtil.createLocation();
     when(locationService.getAllLocations(anyBoolean())).thenReturn(Arrays.asList(location));
@@ -575,7 +579,7 @@ public class ConfigServiceTest {
         .thenReturn(Collections.singletonList("MyCity"));
     List<SyncConfigResponse> responseList = configService.retrieveAllConfigUpdates();
 
-    assertThat(responseList, hasSize(7));
+    assertThat(responseList, hasSize(8));
     verify(locationService, times(1)).getAllLocations(anyBoolean());
     verify(addressHierarchyService, times(1)).getAddressHierarchyEntriesAtTopLevel();
     verify(addressHierarchyService, times(7))
