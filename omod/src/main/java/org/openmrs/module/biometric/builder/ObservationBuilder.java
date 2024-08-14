@@ -59,16 +59,16 @@ public class ObservationBuilder {
 
         Concept concept = Context.getConceptService().getConcept(observation.getName());
         if (null == concept) {
-          throw new EntityNotFoundException(String.format("Invalid observation name %s", observation.getName()));
+          LOGGER.warn("Concept with name {} does not exist. Observation will not be saved!", observation.getName());
+        } else {
+          Obs obs = new Obs();
+          obs.setConcept(concept);
+          obs.setPerson(person);
+          obs.setObsDatetime(util.convertIsoStringToDate(request.getStartDatetime()));
+          obs.setValueAsString(observation.getValue());
+
+          obsSet.add(obs);
         }
-
-        Obs obs = new Obs();
-        obs.setConcept(concept);
-        obs.setPerson(person);
-        obs.setObsDatetime(util.convertIsoStringToDate(request.getStartDatetime()));
-        obs.setValueAsString(observation.getValue());
-
-        obsSet.add(obs);
       }
     }
     return obsSet;
