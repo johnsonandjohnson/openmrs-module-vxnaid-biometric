@@ -25,12 +25,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.type.TypeReference;
+import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Visit;
 import org.openmrs.VisitAttribute;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.ObsService;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.biometric.api.constants.BiometricApiConstants;
 import org.openmrs.module.biometric.api.exception.BiometricApiException;
 import org.openmrs.module.biometric.api.exception.EntityConflictException;
 import org.openmrs.module.biometric.api.exception.EntityNotFoundException;
@@ -309,6 +315,52 @@ public class VisitController extends BaseRestController {
     List<Visit> visits = visitSchedulerService
         .findVisitsByUuids(SanitizeUtil.sanitizeStringList(map.get("visitUuids")));
     return visitResponseBuilder.createFrom(visits);
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  @RequestMapping(value = "/updateEncounterObservations/{visitUuid}", method = RequestMethod.POST)
+  public void updateEncounterObservationByVisit(
+      @PathVariable("visitUuid") String visitUuid, @RequestBody Map<String, String> obsToAdd)
+      throws EntityNotFoundException, ParseException {
+    Visit visit = Context.getVisitService().getVisitByUuid(visitUuid);
+    if (visit == null) {
+      throw new EntityNotFoundException(String.format("Visit with uuid %s not found", visitUuid));
+    }
+
+    EncounterService encounterService = Context.getEncounterService();
+    Encounter encounter;
+    List<Encounter> encounters = encounterService.getEncountersByVisit(visit, false);
+    if (CollectionUtils.isEmpty(encounters)) {
+      encounter = new Encounter();
+      encounter.setEncounterType(Context.getEncounterService().getEncounterType(BiometricApiConstants.DOSING_VISIT_TYPE));
+      encounter.setPatient(visit.getPatient());
+      encounter.setEncounterDatetime(new Date());
+      encounter.setLocation(visit.getLocation());
+      encounter.setVisit(visit);
+      encounterService.saveEncounter(encounter);
+    } else {
+      encounter = encounters.get(0);
+    }
+
+    ObsService obsService = Context.getObsService();
+    for (Map.Entry<String, String> entry : obsToAdd.entrySet()) {
+      Concept concept = Context.getConceptService().getConcept(entry.getKey());
+
+      if (null == concept) {
+        LOGGER.warn(
+            "Concept with name {} does not exist. Observation will not be saved!", entry.getKey());
+      } else {
+        Obs obs = new Obs();
+        obs.setConcept(concept);
+        obs.setPerson(encounter.getPatient());
+        obs.setObsDatetime(new Date());
+        obs.setValueAsString(entry.getValue());
+
+        obs.setEncounter(encounter);
+        obsService.saveObs(obs, "");
+      }
+    }
   }
 
   private void validateVisitParticipantUuids(String participantUuid, String visitUuid)
