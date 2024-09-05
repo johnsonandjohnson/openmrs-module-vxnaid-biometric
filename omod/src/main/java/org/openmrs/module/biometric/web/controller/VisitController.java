@@ -4,13 +4,13 @@
  * OpenMRS is also distributed under the terms of the Healthcare Disclaimer located at
  * http://openmrs.org/license.
  *
- * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is
- * a trademark of OpenMRS Inc.
+ * <p>Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS graphic logo is a
+ * trademark of OpenMRS Inc.
  */
-
 package org.openmrs.module.biometric.web.controller;
 
 import static org.openmrs.module.biometric.constants.BiometricModConstants.DEVICE_ID;
+import static org.openmrs.module.biometric.constants.BiometricModConstants.OPEN_MRS_ID;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,10 +31,14 @@ import org.codehaus.jackson.type.TypeReference;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PersonAttribute;
 import org.openmrs.Visit;
 import org.openmrs.VisitAttribute;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.biometric.api.constants.BiometricApiConstants;
 import org.openmrs.module.biometric.api.exception.BiometricApiException;
@@ -46,6 +50,7 @@ import org.openmrs.module.biometric.builder.EncounterBuilder;
 import org.openmrs.module.biometric.builder.ObservationBuilder;
 import org.openmrs.module.biometric.builder.VisitRequestBuilder;
 import org.openmrs.module.biometric.builder.VisitResponseBuilder;
+import org.openmrs.module.biometric.constants.BiometricModConstants;
 import org.openmrs.module.biometric.contract.NewVisitResponse;
 import org.openmrs.module.biometric.contract.VisitRequest;
 import org.openmrs.module.biometric.contract.VisitResponse;
@@ -65,9 +70,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-/**
- * Consists of APIs to create/retrieve visit/encounter for a participant.
- */
+/** Consists of APIs to create/retrieve visit/encounter for a participant. */
 @Api(
     value = "Visit Information",
     tags = {"REST API for managing dosing and follow up visits"})
@@ -87,23 +90,17 @@ public class VisitController extends BaseRestController {
 
   private static final String DOSE_NUMBER_ATTRIBUTE_TYPE_NAME = "Dose number";
 
-  @Autowired
-  private VisitSchedulerService visitSchedulerService;
+  @Autowired private VisitSchedulerService visitSchedulerService;
 
-  @Autowired
-  private VisitRequestBuilder visitRequestBuilder;
+  @Autowired private VisitRequestBuilder visitRequestBuilder;
 
-  @Autowired
-  private VisitResponseBuilder visitResponseBuilder;
+  @Autowired private VisitResponseBuilder visitResponseBuilder;
 
-  @Autowired
-  private EncounterBuilder encounterBuilder;
+  @Autowired private EncounterBuilder encounterBuilder;
 
-  @Autowired
-  private ObservationBuilder observationBuilder;
+  @Autowired private ObservationBuilder observationBuilder;
 
-  @Autowired
-  private BiometricModUtil util;
+  @Autowired private BiometricModUtil util;
 
   /**
    * Create visit for a participant.
@@ -121,16 +118,16 @@ public class VisitController extends BaseRestController {
       response = NewVisitResponse.class)
   @ApiResponses(
       value = {
-          @ApiResponse(code = HttpURLConnection.HTTP_OK, message = "On successful creation of visit"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to create a visit"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_CONFLICT,
-              message = "Visit id conflicts with another visit"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_BAD_REQUEST,
-              message = "Invalid details shared for visit creation")
+        @ApiResponse(code = HttpURLConnection.HTTP_OK, message = "On successful creation of visit"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to create a visit"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_CONFLICT,
+            message = "Visit id conflicts with another visit"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_BAD_REQUEST,
+            message = "Invalid details shared for visit creation")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -173,13 +170,13 @@ public class VisitController extends BaseRestController {
       response = VisitResponse.class)
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful return of visit details"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to return visit details"),
-          @ApiResponse(code = HttpURLConnection.HTTP_NOT_FOUND, message = "Patient not found")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful return of visit details"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to return visit details"),
+        @ApiResponse(code = HttpURLConnection.HTTP_NOT_FOUND, message = "Patient not found")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -189,14 +186,14 @@ public class VisitController extends BaseRestController {
       method = RequestMethod.GET)
   public List<VisitResponse> retrieveVisit(
       @ApiParam(
-          name = "personUuid",
-          value = "Person whose visits are to be retrieved",
-          required = true)
-      @PathVariable("personUuid")
+              name = "personUuid",
+              value = "Person whose visits are to be retrieved",
+              required = true)
+          @PathVariable("personUuid")
           String personUuid)
       throws EntityNotFoundException {
-    List<Visit> visits = visitSchedulerService
-        .findVisitByPersonUuid(SanitizeUtil.sanitizeInputString(personUuid));
+    List<Visit> visits =
+        visitSchedulerService.findVisitByPersonUuid(SanitizeUtil.sanitizeInputString(personUuid));
     return visitResponseBuilder.createFrom(visits);
   }
 
@@ -213,18 +210,18 @@ public class VisitController extends BaseRestController {
       response = NewVisitResponse.class)
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful creation of encounter for visit"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to create encounter"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_BAD_REQUEST,
-              message = "Request details to save encounter is not valid"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_NOT_FOUND,
-              message = "Visit for creating encounter not found")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful creation of encounter for visit"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to create encounter"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_BAD_REQUEST,
+            message = "Request details to save encounter is not valid"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_NOT_FOUND,
+            message = "Visit for creating encounter not found")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -234,7 +231,7 @@ public class VisitController extends BaseRestController {
       method = RequestMethod.POST)
   public NewVisitResponse createEncounter(
       @ApiParam(name = "visitRequest", value = "Visit details to create encounter", required = true)
-      @RequestBody
+          @RequestBody
           String visitRequest)
       throws IOException, ParseException, BiometricApiException {
 
@@ -275,7 +272,7 @@ public class VisitController extends BaseRestController {
    *
    * @param body request body
    * @return list of matched participants details by biometric template/phone/identifier or
-   * combination of these
+   *     combination of these
    */
   @ApiOperation(
       value = "Get Visit Details By Uuids",
@@ -283,15 +280,15 @@ public class VisitController extends BaseRestController {
       response = VisitResponse.class)
   @ApiResponses(
       value = {
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_OK,
-              message = "On successful return visit details"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_INTERNAL_ERROR,
-              message = "Failure to return visit details"),
-          @ApiResponse(
-              code = HttpURLConnection.HTTP_BAD_REQUEST,
-              message = "Error in request uuids used")
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_OK,
+            message = "On successful return visit details"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_INTERNAL_ERROR,
+            message = "Failure to return visit details"),
+        @ApiResponse(
+            code = HttpURLConnection.HTTP_BAD_REQUEST,
+            message = "Error in request uuids used")
       })
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -309,11 +306,11 @@ public class VisitController extends BaseRestController {
     LOGGER.debug("getVisitsByUuids request triggered at : {}", new Date());
 
     Map<String, Set<String>> map =
-        util.jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {
-        });
+        util.jsonToObject(body, new TypeReference<Map<String, Set<String>>>() {});
     util.validateUuids(map.get("visitUuids"));
-    List<Visit> visits = visitSchedulerService
-        .findVisitsByUuids(SanitizeUtil.sanitizeStringList(map.get("visitUuids")));
+    List<Visit> visits =
+        visitSchedulerService.findVisitsByUuids(
+            SanitizeUtil.sanitizeStringList(map.get("visitUuids")));
     return visitResponseBuilder.createFrom(visits);
   }
 
@@ -333,7 +330,8 @@ public class VisitController extends BaseRestController {
     List<Encounter> encounters = encounterService.getEncountersByVisit(visit, false);
     if (CollectionUtils.isEmpty(encounters)) {
       encounter = new Encounter();
-      encounter.setEncounterType(Context.getEncounterService().getEncounterType(BiometricApiConstants.DOSING_VISIT_TYPE));
+      encounter.setEncounterType(
+          Context.getEncounterService().getEncounterType(BiometricApiConstants.DOSING_VISIT_TYPE));
       encounter.setPatient(visit.getPatient());
       encounter.setEncounterDatetime(new Date());
       encounter.setLocation(visit.getLocation());
@@ -360,6 +358,49 @@ public class VisitController extends BaseRestController {
         obs.setEncounter(encounter);
         obsService.saveObs(obs, "");
       }
+    }
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  @RequestMapping(
+      value = "/updateParticipantLocation/{participantUuid}",
+      method = RequestMethod.POST)
+  public void updateParticipantLocation(
+      @PathVariable("participantUuid") String participantUuid, @RequestBody String newLocationUuid)
+      throws EntityNotFoundException {
+    PatientService patientService = Context.getPatientService();
+    Patient participant = patientService.getPatientByUuid(participantUuid);
+    if (participant == null) {
+      throw new EntityNotFoundException(
+          String.format("Participant with uuid: %s not found", participantUuid));
+    }
+
+    String escapedNewLocationUuid = StringUtils.strip(newLocationUuid, "\"");
+
+    PersonAttribute locationAttribute =
+        participant.getAttribute(BiometricModConstants.LOCATION_ATTRIBUTE);
+    if (locationAttribute != null) {
+      PersonAttribute newLocationAttribute = new PersonAttribute();
+      newLocationAttribute.setAttributeType(locationAttribute.getAttributeType());
+      newLocationAttribute.setValue(escapedNewLocationUuid);
+      participant.addAttribute(newLocationAttribute);
+
+      PatientIdentifier patientIdentifier = participant.getPatientIdentifier(OPEN_MRS_ID);
+      if (patientIdentifier != null) {
+        patientIdentifier.setVoided(Boolean.TRUE);
+        patientIdentifier.setVoidReason("Voided because of creating new one with updated location");
+
+        PatientIdentifier identifierWithNewLocation = new PatientIdentifier();
+        identifierWithNewLocation.setIdentifierType(patientIdentifier.getIdentifierType());
+        identifierWithNewLocation.setIdentifier(patientIdentifier.getIdentifier());
+        identifierWithNewLocation.setPreferred(patientIdentifier.getPreferred());
+        identifierWithNewLocation.setLocation(
+            Context.getLocationService().getLocationByUuid(escapedNewLocationUuid));
+        participant.addIdentifier(identifierWithNewLocation);
+      }
+
+      patientService.savePatient(participant);
     }
   }
 
