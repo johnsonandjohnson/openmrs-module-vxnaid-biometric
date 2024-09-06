@@ -1041,10 +1041,10 @@
     "MultipartFile" : {
       "type" : "object",
       "properties" : {
-        "originalFilename" : {
+        "contentType" : {
           "type" : "string"
         },
-        "contentType" : {
+        "originalFilename" : {
           "type" : "string"
         },
         "name" : {

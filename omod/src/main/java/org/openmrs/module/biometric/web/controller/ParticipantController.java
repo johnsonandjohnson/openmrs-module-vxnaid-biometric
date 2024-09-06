@@ -21,6 +21,8 @@ import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.PersonAttribute;
+import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.biometric.api.contract.BiometricMatchingResult;
 import org.openmrs.module.biometric.api.contract.IdentifierResponse;
@@ -36,6 +38,7 @@ import org.openmrs.module.biometric.api.service.BiometricService;
 import org.openmrs.module.biometric.api.service.ParticipantService;
 import org.openmrs.module.biometric.builder.ParticipantMatchResponseBuilder;
 import org.openmrs.module.biometric.builder.PatientBuilder;
+import org.openmrs.module.biometric.constants.BiometricModConstants;
 import org.openmrs.module.biometric.contract.ParticipantMatchResponse;
 import org.openmrs.module.biometric.contract.RegisterRequest;
 import org.openmrs.module.biometric.error.ApiError;
@@ -75,6 +78,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.openmrs.module.biometric.api.constants.BiometricApiConstants.PERSON_TEMPLATE_ATTRIBUTE;
+import static org.openmrs.module.biometric.constants.BiometricModConstants.OPEN_MRS_ID;
 
 /** Consists of APIs to register and match participants. */
 @Api(
@@ -636,6 +640,49 @@ public class ParticipantController extends BaseRestController {
                     identifierTypeName,
                     patientIdentifier.getIdentifier()))
         .collect(Collectors.toList());
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  @RequestMapping(
+      value = "/updateParticipantLocation/{participantUuid}",
+      method = RequestMethod.POST)
+  public void updateParticipantLocation(
+      @PathVariable("participantUuid") String participantUuid, @RequestBody String newLocationUuid)
+      throws EntityNotFoundException {
+    PatientService patientService = Context.getPatientService();
+    Patient participant = patientService.getPatientByUuid(participantUuid);
+    if (participant == null) {
+      throw new EntityNotFoundException(
+          String.format("Participant with uuid: %s not found", participantUuid));
+    }
+
+    String escapedNewLocationUuid = StringUtils.strip(newLocationUuid, "\"");
+
+    PersonAttribute locationAttribute =
+        participant.getAttribute(BiometricModConstants.LOCATION_ATTRIBUTE);
+    if (locationAttribute != null) {
+      PersonAttribute newLocationAttribute = new PersonAttribute();
+      newLocationAttribute.setAttributeType(locationAttribute.getAttributeType());
+      newLocationAttribute.setValue(escapedNewLocationUuid);
+      participant.addAttribute(newLocationAttribute);
+
+      PatientIdentifier patientIdentifier = participant.getPatientIdentifier(OPEN_MRS_ID);
+      if (patientIdentifier != null) {
+        patientIdentifier.setVoided(Boolean.TRUE);
+        patientIdentifier.setVoidReason("Voided because of creating new one with updated location");
+
+        PatientIdentifier identifierWithNewLocation = new PatientIdentifier();
+        identifierWithNewLocation.setIdentifierType(patientIdentifier.getIdentifierType());
+        identifierWithNewLocation.setIdentifier(patientIdentifier.getIdentifier());
+        identifierWithNewLocation.setPreferred(patientIdentifier.getPreferred());
+        identifierWithNewLocation.setLocation(
+            Context.getLocationService().getLocationByUuid(escapedNewLocationUuid));
+        participant.addIdentifier(identifierWithNewLocation);
+      }
+
+      patientService.savePatient(participant);
+    }
   }
 
   private List<PatientResponse> findByParticipantId(String participantId)

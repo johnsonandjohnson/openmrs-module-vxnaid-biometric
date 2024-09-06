@@ -10,7 +10,6 @@
 package org.openmrs.module.biometric.web.controller;
 
 import static org.openmrs.module.biometric.constants.BiometricModConstants.DEVICE_ID;
-import static org.openmrs.module.biometric.constants.BiometricModConstants.OPEN_MRS_ID;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,14 +31,12 @@ import org.codehaus.jackson.type.TypeReference;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PersonAttribute;
 import org.openmrs.Visit;
 import org.openmrs.VisitAttribute;
+import org.openmrs.VisitAttributeType;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.ObsService;
-import org.openmrs.api.PatientService;
+import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.biometric.api.constants.BiometricApiConstants;
 import org.openmrs.module.biometric.api.exception.BiometricApiException;
@@ -50,7 +48,6 @@ import org.openmrs.module.biometric.builder.EncounterBuilder;
 import org.openmrs.module.biometric.builder.ObservationBuilder;
 import org.openmrs.module.biometric.builder.VisitRequestBuilder;
 import org.openmrs.module.biometric.builder.VisitResponseBuilder;
-import org.openmrs.module.biometric.constants.BiometricModConstants;
 import org.openmrs.module.biometric.contract.NewVisitResponse;
 import org.openmrs.module.biometric.contract.VisitRequest;
 import org.openmrs.module.biometric.contract.VisitResponse;
@@ -363,45 +360,58 @@ public class VisitController extends BaseRestController {
 
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  @RequestMapping(
-      value = "/updateParticipantLocation/{participantUuid}",
-      method = RequestMethod.POST)
-  public void updateParticipantLocation(
-      @PathVariable("participantUuid") String participantUuid, @RequestBody String newLocationUuid)
+  @RequestMapping(value = "/updateVisitAttributes/{visitUuid}", method = RequestMethod.POST)
+  public void updateVisitAttributes(
+      @PathVariable("visitUuid") String visitUuid,
+      @RequestBody Map<String, String> visitAttributesToAddOrReplace)
       throws EntityNotFoundException {
-    PatientService patientService = Context.getPatientService();
-    Patient participant = patientService.getPatientByUuid(participantUuid);
-    if (participant == null) {
-      throw new EntityNotFoundException(
-          String.format("Participant with uuid: %s not found", participantUuid));
+    VisitService visitService = Context.getVisitService();
+    Visit visit = visitService.getVisitByUuid(visitUuid);
+    if (visit == null) {
+      throw new EntityNotFoundException(String.format("Visit with uuid %s not found", visitUuid));
     }
 
-    String escapedNewLocationUuid = StringUtils.strip(newLocationUuid, "\"");
+    for (Map.Entry<String, String> entry : visitAttributesToAddOrReplace.entrySet()) {
+      Optional<VisitAttribute> existingVisitAttribute =
+          visit.getActiveAttributes().stream()
+              .filter(
+                  attr ->
+                      StringUtils.equalsIgnoreCase(
+                          attr.getAttributeType().getName(), entry.getKey()))
+              .filter(attr -> !attr.getVoided())
+              .findFirst();
 
-    PersonAttribute locationAttribute =
-        participant.getAttribute(BiometricModConstants.LOCATION_ATTRIBUTE);
-    if (locationAttribute != null) {
-      PersonAttribute newLocationAttribute = new PersonAttribute();
-      newLocationAttribute.setAttributeType(locationAttribute.getAttributeType());
-      newLocationAttribute.setValue(escapedNewLocationUuid);
-      participant.addAttribute(newLocationAttribute);
-
-      PatientIdentifier patientIdentifier = participant.getPatientIdentifier(OPEN_MRS_ID);
-      if (patientIdentifier != null) {
-        patientIdentifier.setVoided(Boolean.TRUE);
-        patientIdentifier.setVoidReason("Voided because of creating new one with updated location");
-
-        PatientIdentifier identifierWithNewLocation = new PatientIdentifier();
-        identifierWithNewLocation.setIdentifierType(patientIdentifier.getIdentifierType());
-        identifierWithNewLocation.setIdentifier(patientIdentifier.getIdentifier());
-        identifierWithNewLocation.setPreferred(patientIdentifier.getPreferred());
-        identifierWithNewLocation.setLocation(
-            Context.getLocationService().getLocationByUuid(escapedNewLocationUuid));
-        participant.addIdentifier(identifierWithNewLocation);
+      VisitAttributeType visitAttributeType =
+          getVisitAttributeTypeByName(visitService.getAllVisitAttributeTypes(), entry.getKey());
+      if (visitAttributeType == null) {
+        throw new EntityNotFoundException(
+            String.format("Visit type with name: %s not found", entry.getKey()));
       }
 
-      patientService.savePatient(participant);
+      if (existingVisitAttribute.isPresent()) {
+        VisitAttribute visitAttribute = existingVisitAttribute.get();
+        visitAttribute.setVoided(Boolean.TRUE);
+        visitAttribute.setVoidReason("Voided because of updating with new value");
+      }
+
+      VisitAttribute visitAttribute = new VisitAttribute();
+      visitAttribute.setAttributeType(visitAttributeType);
+      visitAttribute.setValue(entry.getValue());
+      visitAttribute.setOwner(visit);
+      visit.addAttribute(visitAttribute);
     }
+
+    visitService.saveVisit(visit);
+  }
+
+  private VisitAttributeType getVisitAttributeTypeByName(
+      List<VisitAttributeType> visitAttributeTypes, String name) {
+    for (VisitAttributeType attributeType : visitAttributeTypes) {
+      if (attributeType.getName().equalsIgnoreCase(name)) {
+        return attributeType;
+      }
+    }
+    return null;
   }
 
   private void validateVisitParticipantUuids(String participantUuid, String visitUuid)
